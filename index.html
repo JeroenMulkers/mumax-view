@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        canvas.emscripten {
+            border: 0px none;
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1 width=100
+        height=100></canvas>
+
+    <script type='text/javascript'>
+        var Module = {
+            canvas: document.getElementById('canvas')
+        };
+    </script>
+
+    <div id='controls'>
+        Load an OVF1_TEXT file
+        <input type="file" id="files" name="files[]" />
+        <br>
+        <input type="button" value="Fullscreen" onclick="Module.requestFullscreen(false,
+                                                      true)">
+    </div>
+
+
+    <script src="index.js"></script>
+    <script>
+        var loadFile = Module.cwrap("loadfile", null, ["string"]);
+        function handleFileSelect(evt) {
+            var files = evt.target.files;
+            var file = files[0];
+            var reader = new FileReader();
+            reader.onload = function () {
+                var buffer = new Uint8Array(reader.result);
+                FS.createDataFile('/', "config", buffer, true, true, true);
+                buffer = [];
+                loadFile("/config");
+                FS.unlink("/config");
+            }
+            reader.readAsArrayBuffer(file);
+        }
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    </script>
+
+
+    <br><br>
+
+    <div>
+        Instructions
+        <ul>
+            <li>Drag with left mouse button to rotate</li>
+            <li>Scroll to zoom</li>
+        </ul>
+
+        If the web app does not work, try again with another modern browser.
+    </div>
+
+    <!--
+    <script type='text/javascript'>
+        canv.addEventListener('click',    _toggle_background_color, false);
+        canv.addEventListener('touchend', _toggle_background_color, false);
+    </script>
+    -->
+
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "C_Cpp.clang_format_style": "Chromium",
+    "files.associations": {
+        "*.cu": "cpp",
+        "*.cuh": "cpp",
+        "cmath": "cpp",
+        "functional": "cpp"
+    }
+}
