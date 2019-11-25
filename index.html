@@ -29,6 +29,33 @@
         <br>
         <input type="button" value="Fullscreen" onclick="Module.requestFullscreen(false,
                                                       true)">
+
+        <br>
+
+        <input type="range" min="6" max="32" step=1 value="20" oninput="Module._updateArrowSegments(this.value)">
+        Arrow segment number
+
+        <br>
+
+        <input type="range" min="0.01" max="1" step=0.01 value="1"
+            oninput="Module._updateArrowScalingsFactor(this.value)">
+        Arrow scalings factor
+
+        <br>
+
+        <input type="range" min="0.05" max="1" step=0.01 value="0.1" oninput="Module._updateArrowHeadRatio(this.value)">
+        Arrow head ratio
+
+        <br>
+
+        <input type="range" min="0" max="0.2" step=0.01 value="0.1"
+            oninput="Module._updateArrowShaftRadius(this.value)">
+        Arrow shaft radius
+
+        <br>
+
+        <input type="range" min="0" max="0.5" step=0.01 value="0.1" oninput="Module._updateArrowHeadRadius(this.value)">
+        Arrow head radius
     </div>
 
 

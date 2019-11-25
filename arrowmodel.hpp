@@ -34,12 +34,36 @@ class Arrow {
         nSegments_(nSegments) {
     glGenBuffers(1, &VBO_);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+    updateVBOdata();
+  }
+
+  void updateVBOdata() {
     auto triangles_ = triangles();
     glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle) * nTriangles(),
                  &triangles_[0], GL_STATIC_DRAW);
   }
 
   ~Arrow() { glDeleteBuffers(1, &VBO_); }
+
+  void setShaftRadius(float shaftRadius) {
+    shaftRadius_ = shaftRadius;
+    updateVBOdata();
+  }
+
+  void setHeadRadius(float headRadius) {
+    headRadius_ = headRadius;
+    updateVBOdata();
+  }
+
+  void setHeadRatio(float headRatio) {
+    headRatio_ = headRatio;
+    updateVBOdata();
+  }
+
+  void setSegments(float nSegments) {
+    nSegments_ = nSegments;
+    updateVBOdata();
+  }
 
   bool hasShaft() const { return headRatio_ < 0.99; }
 

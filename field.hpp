@@ -103,8 +103,8 @@ Field* testField(glm::ivec3 gridsize) {
         float phi = (float)iy / (float)field->gridsize.y * 2 * glm::pi<float>();
         float theta = (float)ix / (float)field->gridsize.x * glm::pi<float>();
         field->data[idx] =
-            0.9f * glm::vec3(glm::cos(phi) * glm::sin(theta),
-                             glm::sin(phi) * glm::sin(theta), glm::cos(theta));
+            glm::vec3(glm::cos(phi) * glm::sin(theta),
+                      glm::sin(phi) * glm::sin(theta), glm::cos(theta));
       }
     }
   }

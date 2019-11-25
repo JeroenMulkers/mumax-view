@@ -21,6 +21,7 @@ uniform ivec3 gridsize;
 
 uniform mat4 view;
 uniform mat4 projection;
+uniform float ArrowScalingsFactor;
 
 mat3 transInverse(mat3 a)  {
     mat3 b;
@@ -95,7 +96,7 @@ void main() {
     mat4 rotation = mat4(1.0);
     rotation = mat4(1.0) + skew + skew*skew*(1./(1.+vecDir.z));
 
-    float L = length(aInstanceVector);
+    float L = ArrowScalingsFactor * length(aInstanceVector);
     mat4 scale = mat4(1.0);
     scale[0][0] = L;
     scale[1][1] = L;

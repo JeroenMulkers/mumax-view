@@ -30,14 +30,37 @@ void main_loop() {
   loop();
 };
 
+float arrowScalingsFactor = 1.0;
+Arrow* arrow;
 Field* field;
 Camera camera;
 
 extern "C" {
 
 #ifdef __EMSCRIPTEN__
-void EMSCRIPTEN_KEEPALIVE sayhi() {
-  std::cout << "hello from c++" << std::endl;
+void EMSCRIPTEN_KEEPALIVE updateArrowShaftRadius(float r) {
+  arrow->setShaftRadius(r);
+  needRender = true;
+}
+
+void EMSCRIPTEN_KEEPALIVE updateArrowHeadRadius(float r) {
+  arrow->setHeadRadius(r);
+  needRender = true;
+}
+
+void EMSCRIPTEN_KEEPALIVE updateArrowHeadRatio(float r) {
+  arrow->setHeadRatio(r);
+  needRender = true;
+}
+
+void EMSCRIPTEN_KEEPALIVE updateArrowSegments(float n) {
+  arrow->setSegments(n);
+  needRender = true;
+}
+
+void EMSCRIPTEN_KEEPALIVE updateArrowScalingsFactor(float s) {
+  arrowScalingsFactor = s;
+  needRender = true;
 }
 
 void EMSCRIPTEN_KEEPALIVE loadfile(std::string filename) {
@@ -173,7 +196,7 @@ int main() {
 
   field = testField(glm::ivec3(50, 50, 2));
 
-  Arrow arrow(0.12, 0.2, 0.6, 40);
+  arrow = new Arrow(0.12, 0.2, 0.6, 40);
 
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
@@ -184,6 +207,7 @@ int main() {
   shader.attachShader(fragmentshader, GL_FRAGMENT_SHADER);
   shader.link();
   shader.use();
+  shader.setFloat("ArrowScalingsFactor", arrowScalingsFactor);
   shader.setVec3("lightDir", lightDirection);
   shader.setFloat("ambient", ambientLightStrength);
   shader.setFloat("specularStrength", specularLightStrength);
@@ -223,14 +247,14 @@ int main() {
   // Arrow model triangles
   int aPosLoc = glGetAttribLocation(shader.ID, "aPos");
   glEnableVertexAttribArray(aPosLoc);
-  glBindBuffer(GL_ARRAY_BUFFER, arrow.VBO());
+  glBindBuffer(GL_ARRAY_BUFFER, arrow->VBO());
   glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void*)0);
 
   // Arrow model normals
   int aNormalLoc = glGetAttribLocation(shader.ID, "aNormal");
   glEnableVertexAttribArray(aNormalLoc);
-  glBindBuffer(GL_ARRAY_BUFFER, arrow.VBO());
+  glBindBuffer(GL_ARRAY_BUFFER, arrow->VBO());
   glVertexAttribPointer(aNormalLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void*)(sizeof(glm::vec3)));
 
@@ -255,11 +279,12 @@ int main() {
       float aspect = static_cast<float>(width) / static_cast<float>(height);
       glm::mat4 projection = glm::infinitePerspective(fovy, aspect, nearCut);
 
+      shader.setFloat("ArrowScalingsFactor", arrowScalingsFactor);
       shader.setMat4("view", camera.viewMatrix());
       shader.setVec3("viewPos", camera.position());
       shader.setMat4("projection", projection);
 
-      glDrawArraysInstanced(GL_TRIANGLES, 0, arrow.nVertices(),
+      glDrawArraysInstanced(GL_TRIANGLES, 0, arrow->nVertices(),
                             field->ncells());
     }
     needRender = false;
