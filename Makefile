@@ -1,40 +1,54 @@
-.PHONY: desktop
-desktop:
-		mkdir -p build/desktop
-		clang++ main.cpp -o main -lGL -lglfw
-		mv main build/desktop/ovfview
+BUILDDIR=build
+CXX=clang++ 
+CXXFLAGS=-std=c++14 -g
+LDFLAGS=-lGL -lglfw
 
-.PHONY: run-desktop
-run-desktop: desktop
-		./build/desktop/ovfview
-
-.PHONY: web
-web:
-		mkdir -p build/web
-		cp index.html build/web/index.html
-		em++ main.cpp -std=c++14 -I/usr/include/glm/ -o build/web/index.js \
+EMCXX=em++ 
+EMCXXFLAGS=-std=c++14 \
 			-s EXPORT_ALL=1 \
 			-s FORCE_FILESYSTEM=1 \
 			-s EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap']\
 			-s WASM=1 \
 			-s ALLOW_MEMORY_GROWTH=1 \
 			-s USE_WEBGL2=1 \
-			-s USE_GLFW=3 
+			-s USE_GLFW=3 \
+			-I/usr/include/glm/
 
-.PHONY: run-web
-run-web: web
-		firefox ./build/web/index.html
+CPPFILES=main.cpp
+HPPFILES=arrowmodel.hpp camera.hpp field.hpp shaderprogram.hpp shaders.hpp
 
-.PHONY: demo
-demo:
-		mkdir -p build/demo
-		em++ main.cpp -std=c++14 -I/usr/include/glm/ -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s USE_WEBGL2=1 -s USE_GLFW=3 -o build/demo/index.js
 
-.PHONY: emdebug
-emdebug:
-		mkdir -p build/emdebug
-		em++ main.cpp -std=c++14 -I/usr/include/glm/ -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s USE_WEBGL2=1 -s USE_GLFW=3 -o build/emdebug/debug.html
+.PHONY: all
+all: desktop web
 
 .PHONY: clean
 clean:
-		rm -rf build
+		rm -rf ${BUILDDIR}
+
+
+
+
+######## DESKTOP VERSION ########
+
+.PHONY: desktop
+desktop: ${BUILDDIR}/desktop/magvis
+
+${BUILDDIR}/desktop/magvis: ${CPPFILES} ${HPPFILES}
+		mkdir -p ${BUILDDIR}/desktop
+		${CXX} ${CXXFLAGS} main.cpp -o $@ ${LDFLAGS}
+
+
+
+
+######## WEB VERSION ########
+
+.PHONY: web
+web: build/web/index.js build/web/index.html
+
+build/web/index.js: ${CPPFILES} ${HPPFILES}
+		mkdir -p build/web
+		${EMCXX} ${EMCXXFLAGS} main.cpp -o build/web/index.js
+
+build/web/index.html: index.html
+		mkdir -p build/web
+		cp index.html ${@}

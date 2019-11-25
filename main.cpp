@@ -138,6 +138,8 @@ int main() {
   float nearCut = 0.1;
   float fovy = glm::radians(45.0f);
 
+  glfwSetErrorCallback(error_callback);
+
   if (!glfwInit()) {
     std::cerr << "glfwInit failed" << std::endl;
     return -1;
@@ -146,7 +148,6 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_SAMPLES, 16);  // anti-aliasing
-  glfwSetErrorCallback(error_callback);
 
   GLFWwindow* window =
       glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "fieldview", NULL, NULL);

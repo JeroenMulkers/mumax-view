@@ -1,0 +1,61 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "build desktop version",
+            "command": "make",
+            "args": [
+                "desktop"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "build web version",
+            "command": "make",
+            "args": [
+                "web"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "run desktop version",
+            "command": "./build/desktop/magvis",
+            "args": [],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "dependsOn": [
+                "build desktop version"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "run web version",
+            "command": "firefox",
+            "args": [
+                "./build/web/index.html"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "dependsOn": [
+                "build web version"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
