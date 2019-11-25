@@ -56,6 +56,23 @@
                 "build web version"
             ],
             "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "upload web version to dynamag",
+            "command": "scp",
+            "args": [
+                "-r",
+                "./build/web/*",
+                "jeroen@dynamag:/srv/www/magvis"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "dependsOn": [
+                "build web version"
+            ],
+            "problemMatcher": []
         }
     ]
 }
