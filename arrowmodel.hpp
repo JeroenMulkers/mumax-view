@@ -39,6 +39,7 @@ class Arrow {
 
   void updateVBOdata() {
     auto triangles_ = triangles();
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle) * nTriangles(),
                  &triangles_[0], GL_STATIC_DRAW);
   }

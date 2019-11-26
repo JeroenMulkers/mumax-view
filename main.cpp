@@ -70,6 +70,7 @@ void EMSCRIPTEN_KEEPALIVE loadfile(std::string filename) {
   updateFieldAttributes();
   resetCamera();
   delete oldfield;
+  needRender = true;
 }
 
 #endif
@@ -149,12 +150,7 @@ static void error_callback(int error, const char* description) {
 }
 
 int main() {
-  int Nx = 40;
-  int Ny = 40;
-  int Nz = 2;
-
   glm::vec3 backgroundColor = glm::vec3(0.3, 0.3, 0.3);
-
   glm::vec3 lightDirection = glm::vec3(1.0f, 0.5f, -1.0f);
   float ambientLightStrength = 0.1;
   float specularLightStrength = 0.5;
@@ -187,7 +183,6 @@ int main() {
   glfwSetMouseButtonCallback(window, mouse_callback);
   glfwSetCursorPosCallback(window, mousemove_callback);
 
-  // glewInit();
   glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, 0.1f);
   glEnable(GL_DEPTH_TEST);
 #ifndef __EMSCRIPTEN__
@@ -267,6 +262,7 @@ int main() {
 
     if (time - previousTime > 1.0) {
       std::cout << "fps: " << fps << std::endl;
+      std::cout << "ncells: " << field->ncells() << std::endl;
       fps = 0;
       previousTime = time;
     }
