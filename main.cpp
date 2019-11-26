@@ -34,6 +34,7 @@ float arrowScalingsFactor = 1.0;
 Arrow* arrow;
 Field* field;
 Camera camera;
+GLFWwindow* window;
 
 extern "C" {
 
@@ -73,6 +74,25 @@ void EMSCRIPTEN_KEEPALIVE loadfile(std::string filename) {
   needRender = true;
 }
 
+EM_JS(int, canvas_get_width, (), {
+  return document.getElementById('canvas').scrollWidth;
+});
+
+EM_JS(int, canvas_get_height, (), {
+  return document.getElementById('canvas').scrollHeight;
+});
+
+void EMSCRIPTEN_KEEPALIVE updateCanvasSize() {
+  if (!window) {
+    return;
+  }
+  int width = canvas_get_width();
+  int height = canvas_get_height();
+  glfwSetWindowSize(window, width, height);
+  glViewport(0, 0, width, height);
+  needRender = true;
+}
+
 #endif
 }
 
@@ -84,7 +104,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
   needRender = true;
   camera.targetDistance *= (1 - 0.1 * (float)yoffset);
-  std::cout << "scroll: " << yoffset << std::endl;
   // camera.position += (float)yoffset * 0.1f * (camera.target -
   // camera.position);
 }
@@ -167,9 +186,17 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_SAMPLES, 16);  // anti-aliasing
+  glfwWindowHint(GLFW_RESIZABLE, true);
 
-  GLFWwindow* window =
-      glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "fieldview", NULL, NULL);
+#ifdef __EMSCRIPTEN__
+  int width = canvas_get_width();
+  int height = canvas_get_height();
+#else
+  int width = SCR_WIDTH;
+  int height = SCR_HEIGHT;
+#endif
+
+  window = glfwCreateWindow(width, height, "fieldview", NULL, NULL);
 
   if (!window) {
     std::cerr << "Can not create window" << std::endl;
