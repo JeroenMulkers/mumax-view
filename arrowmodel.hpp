@@ -1,14 +1,8 @@
 #pragma once
 
-#include <vector>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include <GLES3/gl3.h>
-
-const float PI = glm::pi<float>();
+#include <glm/glm.hpp>
+#include <vector>
 
 struct Vertex {
   glm::vec3 position;
@@ -32,12 +26,10 @@ class Arrow {
   void setHeadRatio(float headRatio);
   void setSegments(float nSegments);
 
+  std::vector<Triangle> triangles() const;
   bool hasShaft() const;
-
   int nTriangles() const;
   int nVertices() const;
-
-  std::vector<Triangle> triangles() const;
   unsigned int VBO() const;
 
  private:

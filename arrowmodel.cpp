@@ -1,5 +1,10 @@
 #include "arrowmodel.hpp"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+const float PI = glm::pi<float>();
+
 Arrow::Arrow(float shaftRadius,
              float headRadius,
              float headRatio,
@@ -9,7 +14,6 @@ Arrow::Arrow(float shaftRadius,
       headRatio_(headRatio),
       nSegments_(nSegments) {
   glGenBuffers(1, &VBO_);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO_);
   updateVBOdata();
 }
 

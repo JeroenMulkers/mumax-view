@@ -10,6 +10,7 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "arrowmodel.hpp"
 #include "camera.hpp"
@@ -246,8 +247,8 @@ int main() {
     needRender = true;
     camera.yaw = 0.0;
     camera.pitch = 3.1415 / 10.;
-    camera.target = glm::vec3((field->gridsize.x - 1) / 2.0,
-                              (field->gridsize.y - 1) / 2.0, 0.0f);
+    camera.target = glm::vec3((field->gridsize().x - 1) / 2.0,
+                              (field->gridsize().y - 1) / 2.0, 0.0f);
   };
   resetCamera();
 
@@ -255,11 +256,11 @@ int main() {
     needRender = true;
     field->updateVBOs();
 
-    glBindBuffer(GL_ARRAY_BUFFER, field->positionVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, field->positionVBO());
     glVertexAttribPointer(aInstancePosLoc, 3, GL_FLOAT, GL_FALSE,
                           sizeof(glm::vec3), (void*)0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, field->vectorsVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, field->vectorsVBO());
     glVertexAttribPointer(aInstanceVecLoc, 3, GL_FLOAT, GL_FALSE,
                           sizeof(glm::vec3), (void*)0);
   };
