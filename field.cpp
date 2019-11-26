@@ -6,12 +6,7 @@
 #include <string>
 #include <vector>
 
-// USE GLES API FOR RENDERING
-#ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
-#else
 #include <GLES3/gl3.h>
-#endif
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

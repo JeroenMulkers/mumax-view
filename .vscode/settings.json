@@ -5,6 +5,8 @@
         "*.cu": "cpp",
         "*.cuh": "cpp",
         "cmath": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "*.tcc": "cpp",
+        "regex": "cpp"
     }
 }
