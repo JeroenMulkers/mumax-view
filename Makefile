@@ -14,7 +14,7 @@ EMCXXFLAGS=-std=c++14 \
 			-s USE_GLFW=3 \
 			-I/usr/include/glm/
 
-CPPFILES=main.cpp
+CPPFILES=main.cpp arrowmodel.cpp
 HPPFILES=arrowmodel.hpp camera.hpp field.hpp shaderprogram.hpp shaders.hpp
 
 
@@ -35,7 +35,7 @@ desktop: ${BUILDDIR}/desktop/magvis
 
 ${BUILDDIR}/desktop/magvis: ${CPPFILES} ${HPPFILES}
 		mkdir -p ${BUILDDIR}/desktop
-		${CXX} ${CXXFLAGS} main.cpp -o $@ ${LDFLAGS}
+		${CXX} ${CXXFLAGS} ${CPPFILES} -o $@ ${LDFLAGS}
 
 
 
@@ -47,7 +47,7 @@ web: build/web/index.js build/web/index.html
 
 build/web/index.js: ${CPPFILES} ${HPPFILES}
 		mkdir -p build/web
-		${EMCXX} ${EMCXXFLAGS} main.cpp -o build/web/index.js
+		${EMCXX} ${EMCXXFLAGS} ${CPPFILES} -o build/web/index.js
 
 build/web/index.html: index.html
 		mkdir -p build/web
