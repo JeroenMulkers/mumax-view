@@ -4,8 +4,19 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="slider.css">
+
     <style>
+        body {
+            padding: 10px;
+        }
+
+        #controlmenu {
+            width: 400px;
+        }
+
         canvas.emscripten {
+            position: absolute;
             top: 0px;
             left: 0px;
             margin: 0px;
@@ -13,54 +24,163 @@
             background-color: black;
             width: 100%;
             height: 100%;
+            z-index: -1;
+        }
+
+        /* Style the tab */
+        .tab {
+            background-color: rgba(200, 200, 200, 0.8);
+            margin-bottom: 5px;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: transparent;
+            margin: 0px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 12px 10px;
+            transition: 0.3s;
+            font-size: 0.9em;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        .tabcontent {
+            background-color: rgba(200, 200, 200, 0.8);
+            display: none;
+            padding: 12px 12px;
+            font-size: 0.8em;
+            font-family: 'Lucida Grande', 'sans-serif';
+            color: #222
         }
     </style>
 </head>
 
 <body>
+
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+
+    <div id="controlmenu">
+
+        <div class="tab">
+            <button class="tablinks" onclick="toggleTab(event, 'magnetization')">Magnetization</button>
+            <button class="tablinks" onclick="toggleTab(event, 'arrows')">Arrows</button>
+            <button class="tablinks" onclick="toggleTab(event, 'colors')">Colors</button>
+            <!--
+        <button onclick="Module.requestFullscreen(false, true)">Fullscreen</button>
+        -->
+            <button class="tablinks" onclick="toggleTab(event, 'help')" style="float:right">Help</button>
+        </div>
+
+        <div id="magnetization" class="tabcontent">
+            Load an OVF1_TEXT file
+            <input type="file" id="files" name="files[]" />
+        </div>
+
+
+
+        <div id="arrows" class="tabcontent">
+            <input type="range" min="0.01" max="1" step=0.01 value="1"
+                oninput="Module._updateArrowScalingsFactor(this.value)">
+            Scalings factor
+
+            <br>
+
+            <input type="range" min="0.05" max="1" step=0.01 value="0.1"
+                oninput="Module._updateArrowHeadRatio(this.value)">
+            Head ratio
+
+            <br>
+
+            <input type="range" min="0" max="0.2" step=0.01 value="0.1"
+                oninput="Module._updateArrowShaftRadius(this.value)">
+            Shaft radius
+
+            <br>
+
+            <input type="range" min="0" max="0.5" step=0.01 value="0.1"
+                oninput="Module._updateArrowHeadRadius(this.value)">
+            Head radius
+        </div>
+
+
+
+        <div id="colors" class="tabcontent">
+            <input type="color" style="width: 100px" oninput="setBackgroundColor(this.value)">
+            Background color
+
+            <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setAmbientLight(this.value)">
+            Ambient lighting
+
+            <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setSpecularLight(this.value)">
+            Specular lighting
+
+        </div>
+
+
+
+        <div id="help" class="tabcontent">
+            <div>
+                Instructions
+                <ul>
+                    <li>Drag with left mouse button to rotate</li>
+                    <li>Scroll to zoom</li>
+                </ul>
+
+                If the web app does not work, try again with another modern browser.
+            </div>
+        </div>
+
+    </div>
+
+
+    <script>
+        function toggleTab(evt, tabName) {
+            var wasOpen = document.getElementById(tabName).style.display == "block";
+            closeTabs();
+            if (!wasOpen) {
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+        }
+
+        function closeTabs() {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+        }
+
+        function setBackgroundColor(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            var r = parseInt(result[1], 16) / 255;
+            var g = parseInt(result[2], 16) / 255;
+            var b = parseInt(result[3], 16) / 255;
+            Module._setBackgroundColor(r, g, b);
+        }
+    </script>
+
 
     <script type='text/javascript'>
         var Module = {
             canvas: document.getElementById('canvas')
         };
     </script>
-
-    <div id='controls'>
-        Load an OVF1_TEXT file
-        <input type="file" id="files" name="files[]" />
-        <br>
-        <input type="button" value="Fullscreen" onclick="Module.requestFullscreen(false,
-                                                      true)">
-
-        <br>
-
-        <input type="range" min="6" max="32" step=1 value="20" oninput="Module._updateArrowSegments(this.value)">
-        Arrow segment number
-
-        <br>
-
-        <input type="range" min="0.01" max="1" step=0.01 value="1"
-            oninput="Module._updateArrowScalingsFactor(this.value)">
-        Arrow scalings factor
-
-        <br>
-
-        <input type="range" min="0.05" max="1" step=0.01 value="0.1" oninput="Module._updateArrowHeadRatio(this.value)">
-        Arrow head ratio
-
-        <br>
-
-        <input type="range" min="0" max="0.2" step=0.01 value="0.1"
-            oninput="Module._updateArrowShaftRadius(this.value)">
-        Arrow shaft radius
-
-        <br>
-
-        <input type="range" min="0" max="0.5" step=0.01 value="0.1" oninput="Module._updateArrowHeadRadius(this.value)">
-        Arrow head radius
-    </div>
-
 
     <script src="index.js"></script>
     <script>
@@ -81,28 +201,9 @@
         Module.onRuntimeInitialized = function () {
             document.getElementById('files').addEventListener('change', handleFileSelect, false);
             window.addEventListener('resize', function () { Module._updateCanvasSize(); }, false);
+            document.getElementById('canvas').addEventListener('mousedown', closeTabs, false);
         }
     </script>
-
-
-    <br><br>
-
-    <div>
-        Instructions
-        <ul>
-            <li>Drag with left mouse button to rotate</li>
-            <li>Scroll to zoom</li>
-        </ul>
-
-        If the web app does not work, try again with another modern browser.
-    </div>
-
-    <!--
-    <script type='text/javascript'>
-        canv.addEventListener('click',    _toggle_background_color, false);
-        canv.addEventListener('touchend', _toggle_background_color, false);
-    </script>
-    -->
 
 </body>
 

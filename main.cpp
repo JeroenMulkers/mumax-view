@@ -50,11 +50,6 @@ void updateArrowHeadRatio(float r) {
   renderer->needRender = true;
 }
 EMSCRIPTEN_KEEPALIVE
-void updateArrowSegments(float n) {
-  renderer->arrow.setSegments(n);
-  renderer->needRender = true;
-}
-EMSCRIPTEN_KEEPALIVE
 void updateArrowScalingsFactor(float s) {
   renderer->arrowScalingsFactor = s;
   renderer->needRender = true;
@@ -81,6 +76,20 @@ void updateCanvasSize() {
   int height = canvas_get_height();
   glfwSetWindowSize(window, width, height);
   glViewport(0, 0, width, height);
+}
+EMSCRIPTEN_KEEPALIVE
+void setBackgroundColor(float r, float g, float b) {
+  glClearColor(r, g, b, 1.0f);
+  renderer->needRender = true;
+}
+EMSCRIPTEN_KEEPALIVE
+void setSpecularLight(float intensity) {
+  renderer->shader.setFloat("specularStrength", intensity);
+  renderer->needRender = true;
+}
+EMSCRIPTEN_KEEPALIVE
+void setAmbientLight(float intensity) {
+  renderer->shader.setFloat("ambient", intensity);
   renderer->needRender = true;
 }
 #endif
@@ -134,7 +143,7 @@ int main() {
 
   // -------- GL SETTINGS --------------------------------------------------
 
-  glClearColor(0.3f, 0.3f, 0.3f, 0.1f);
+  glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 #ifndef __EMSCRIPTEN__
   glEnable(GL_MULTISAMPLE);  // Needed for anti-aliasing
@@ -142,7 +151,7 @@ int main() {
 
   // -------- CREATE RENDERER ----------------------------------------------
 
-  renderer = new FieldRenderer(testField(glm::ivec3(50, 50, 2)));
+  renderer = new FieldRenderer(testField(glm::ivec3(50, 50, 1)));
 
   //--------- MAIN LOOP ----------------------------------------------------
 
