@@ -63,6 +63,23 @@
             font-family: 'Lucida Grande', 'sans-serif';
             color: #222
         }
+
+        .colorbox {
+            display: inline-block;
+            margin-bottom: -10px;
+        }
+
+        .gradient {
+            margin: 0px;
+        }
+
+        input[type="color"] {
+            opacity: 0;
+            display: block;
+            width: 30px;
+            height: 15px;
+            border: none;
+        }
     </style>
 </head>
 
@@ -79,7 +96,7 @@
             <!--
         <button onclick="Module.requestFullscreen(false, true)">Fullscreen</button>
         -->
-            <button class="tablinks" onclick="toggleTab(event, 'help')" style="float:right">Help</button>
+            <button class="tablinks" onclick="toggleTab(event, 'about')" style="float:right">About</button>
         </div>
 
         <div id="magnetization" class="tabcontent">
@@ -116,8 +133,13 @@
 
 
         <div id="colors" class="tabcontent">
-            <input type="color" style="width: 100px" oninput="setBackgroundColor(this.value)">
+            <div class="colorbox" id="backgroundColorBox">
+                <input type="color" id="backgroundColor" box="backgroundColorBox"
+                    oninput="updateColorInputBox(this);setBackgroundColor(this.value)">
+            </div>
             Background color
+
+            <br>
 
             <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setAmbientLight(this.value)">
             Ambient lighting
@@ -125,11 +147,37 @@
             <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setSpecularLight(this.value)">
             Specular lighting
 
+            <br>
+
+            Colorscheme
+            <br>
+            <input type="radio" name="colorscheme" value="mumax3" oninput="setMumaxColorScheme()" checked>
+            Mumax3<br>
+
+            <input type="radio" name="colorscheme" value="gradient" id="gradientRadioButton"
+                oninput="setGradientColorScheme()">
+            Gradient
+            <div class="gradient" id="gradient" style="display:none">
+
+                <div class="colorbox" id="gradientPositiveColorBox">
+                    <input type="color" id="gradientPositiveColor" value="#FF0000" box="gradientPositiveColorBox"
+                        oninput="updateColorInputBox(this);setGradientColorScheme()">
+                </div>
+
+                <div class="colorbox" id="gradientZeroColorBox">
+                    <input type="color" id="gradientZeroColor" value="#FFFFFF" box="gradientZeroColorBox"
+                        oninput="updateColorInputBox(this);setGradientColorScheme()">
+                </div>
+
+                <div class="colorbox" id="gradientNegativeColorBox">
+                    <input type="color" id="gradientNegativeColor" value="#0000FF" box="gradientNegativeColorBox"
+                        oninput="updateColorInputBox(this);setGradientColorScheme()">
+                </div>
+
+            </div>
         </div>
 
-
-
-        <div id="help" class="tabcontent">
+        <div id="about" class="tabcontent">
             <div>
                 Instructions
                 <ul>
@@ -141,69 +189,104 @@
             </div>
         </div>
 
-    </div>
 
 
-    <script>
-        function toggleTab(evt, tabName) {
-            var wasOpen = document.getElementById(tabName).style.display == "block";
-            closeTabs();
-            if (!wasOpen) {
-                document.getElementById(tabName).style.display = "block";
-                evt.currentTarget.className += " active";
+        <script>
+
+
+            function toggleTab(evt, tabName) {
+                var wasOpen = document.getElementById(tabName).style.display == "block";
+                closeTabs();
+                if (!wasOpen) {
+                    document.getElementById(tabName).style.display = "block";
+                    evt.currentTarget.className += " active";
+                }
             }
-        }
 
-        function closeTabs() {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
+            function closeTabs() {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
             }
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
+
+            function hexColorToRGBnormalized(hex) {
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return {
+                    r: parseInt(result[1], 16) / 255,
+                    g: parseInt(result[2], 16) / 255,
+                    b: parseInt(result[3], 16) / 255
+                };
             }
-        }
 
-        function setBackgroundColor(hex) {
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            var r = parseInt(result[1], 16) / 255;
-            var g = parseInt(result[2], 16) / 255;
-            var b = parseInt(result[3], 16) / 255;
-            Module._setBackgroundColor(r, g, b);
-        }
-    </script>
-
-
-    <script type='text/javascript'>
-        var Module = {
-            canvas: document.getElementById('canvas')
-        };
-    </script>
-
-    <script src="index.js"></script>
-    <script>
-        var loadFile = Module.cwrap("loadfile", null, ["string"]);
-        function handleFileSelect(evt) {
-            var files = evt.target.files;
-            var file = files[0];
-            var reader = new FileReader();
-            reader.onload = function () {
-                var buffer = new Uint8Array(reader.result);
-                FS.createDataFile('/', "config", buffer, true, true, true);
-                buffer = [];
-                loadFile("/config");
-                FS.unlink("/config");
+            function setBackgroundColor(hex) {
+                var color = hexColorToRGBnormalized(hex);
+                Module._setBackgroundColor(color.r, color.g, color.b);
             }
-            reader.readAsArrayBuffer(file);
-        }
-        Module.onRuntimeInitialized = function () {
-            document.getElementById('files').addEventListener('change', handleFileSelect, false);
-            window.addEventListener('resize', function () { Module._updateCanvasSize(); }, false);
-            document.getElementById('canvas').addEventListener('mousedown', closeTabs, false);
-        }
-    </script>
+
+            function setMumaxColorScheme() {
+                document.getElementById("gradient").style.display = "none";
+                Module._setMumaxColorScheme()
+            }
+
+            function setGradientColorScheme() {
+                document.getElementById("gradient").style.display = "inline-block";
+                var posColor = hexColorToRGBnormalized(document.getElementById("gradientPositiveColor").value);
+                var nulColor = hexColorToRGBnormalized(document.getElementById("gradientZeroColor").value);
+                var negColor = hexColorToRGBnormalized(document.getElementById("gradientNegativeColor").value);
+                Module._setGradientColorScheme(
+                    posColor.r, posColor.g, posColor.b,
+                    nulColor.r, nulColor.g, nulColor.b,
+                    negColor.r, negColor.g, negColor.b);
+            }
+
+            function updateColorInputBox(colorInput) {
+                var color = colorInput.value;
+                var box = document.getElementById(colorInput.getAttribute("box"))
+                box.style.backgroundColor = color;
+            }
+
+            updateColorInputBox(document.getElementById("backgroundColor"));
+            updateColorInputBox(document.getElementById("gradientPositiveColor"));
+            updateColorInputBox(document.getElementById("gradientZeroColor"));
+            updateColorInputBox(document.getElementById("gradientNegativeColor"));
+
+        </script>
+
+
+        <script type='text/javascript'>
+            var Module = {
+                canvas: document.getElementById('canvas')
+            };
+        </script>
+
+        <script src="index.js"></script>
+        <script>
+            var loadFile = Module.cwrap("loadfile", null, ["string"]);
+            function handleFileSelect(evt) {
+                var files = evt.target.files;
+                var file = files[0];
+                var reader = new FileReader();
+                reader.onload = function () {
+                    var buffer = new Uint8Array(reader.result);
+                    FS.createDataFile('/', "config", buffer, true, true, true);
+                    buffer = [];
+                    loadFile("/config");
+                    FS.unlink("/config");
+                }
+                reader.readAsArrayBuffer(file);
+            }
+            Module.onRuntimeInitialized = function () {
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+                window.addEventListener('resize', function () { Module._updateCanvasSize(); }, false);
+                document.getElementById('canvas').addEventListener('mousedown', closeTabs, false);
+            }
+        </script>
 
 </body>
 

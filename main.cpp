@@ -92,6 +92,25 @@ void setAmbientLight(float intensity) {
   renderer->shader.setFloat("ambient", intensity);
   renderer->needRender = true;
 }
+EMSCRIPTEN_KEEPALIVE
+void setGradientColorScheme(float r1,
+                            float g1,
+                            float b1,
+                            float r2,
+                            float g2,
+                            float b2,
+                            float r3,
+                            float g3,
+                            float b3) {
+  renderer->setGradientColorScheme(
+      glm::mat3(r1, g1, b1, r2, g2, b2, r3, g3, b3));
+  renderer->needRender = true;
+}
+EMSCRIPTEN_KEEPALIVE
+void setMumaxColorScheme() {
+  renderer->setMumaxColorScheme();
+  renderer->needRender = true;
+}
 #endif
 }
 

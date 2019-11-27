@@ -1,10 +1,14 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "arrowmodel.hpp"
 #include "camera.hpp"
 #include "field.hpp"
 #include "shaderprogram.hpp"
 #include "shaders.hpp"
+
+enum ColorSchemeType { COLORSCHEME_MUMAX, COLORSCHEME_GRADIENT };
 
 class FieldRenderer {
  public:
@@ -19,6 +23,7 @@ class FieldRenderer {
     resetCamera();
     updateProjectionMatrix();
     shader.use();  // TODO: check why this is needed here
+    setMumaxColorScheme();
   }
 
   ~FieldRenderer() { glDeleteBuffers(1, &VAO); }
@@ -29,6 +34,24 @@ class FieldRenderer {
     updateFieldAttribPointers();
     needRender = true;
   }
+
+  void setGradientColorScheme(glm::mat3 gradient) {
+    shader.setBool("useColorGradient", true);
+    shader.setMat3("colorGradient", gradient);
+    colorGradient_ = gradient;
+    colorSchemeType_ = COLORSCHEME_GRADIENT;
+    needRender = true;
+  };
+
+  void setMumaxColorScheme() {
+    shader.setBool("useColorGradient", false);
+    colorSchemeType_ = COLORSCHEME_MUMAX;
+    needRender = true;
+  };
+
+  ColorSchemeType colorSchemeType() { return colorSchemeType_; };
+
+  glm::mat3 colorGradient() { return colorGradient_; }
 
   void initShader() {
     shader.attachShader(vertexshader, GL_VERTEX_SHADER);
@@ -139,4 +162,8 @@ class FieldRenderer {
   float arrowScalingsFactor;
   Field* field_;
   int nRenderings_;
+
+ private:
+  ColorSchemeType colorSchemeType_;
+  glm::mat3 colorGradient_;
 };

@@ -22,6 +22,8 @@ uniform ivec3 gridsize;
 uniform mat4 view;
 uniform mat4 projection;
 uniform float ArrowScalingsFactor;
+uniform mat3 colorGradient;
+uniform bool useColorGradient;
 
 mat3 transInverse(mat3 a)  {
     mat3 b;
@@ -45,7 +47,21 @@ mat3 transInverse(mat3 a)  {
     return b;
 }
 
-vec3 vec2rgb(vec3 vec) {
+vec3 vec2rgb_gradient(vec3 vec) {
+    vec = normalize(vec);
+
+    vec3 colorPos = colorGradient[0];
+    vec3 colorNul = colorGradient[1];
+    vec3 colorNeg = colorGradient[2];
+
+    if (vec.z > 0.) {
+        return colorNul + vec.z*(colorPos-colorNul);
+    } else {
+        return colorNul - vec.z*(colorNeg-colorNul);
+    }
+}
+
+vec3 vec2rgb_mumax(vec3 vec) {
     float H = atan(vec.y, vec.x);
     float S = 1.0;
     float L = 0.5+0.5*vec.z;
@@ -108,7 +124,11 @@ void main() {
     Normal = transInverse(mat3(model)) * aNormal;  
  	gl_Position =  projection * view * model * local;
 
-    Color = vec2rgb(vecDir);
+    if (useColorGradient) {
+        Color = vec2rgb_gradient(vecDir);
+    } else {
+        Color = vec2rgb_mumax(vecDir);
+    }
 }
 )";
 
