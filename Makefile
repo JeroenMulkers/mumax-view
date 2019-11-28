@@ -31,9 +31,9 @@ clean:
 ######## DESKTOP VERSION ########
 
 .PHONY: desktop
-desktop: ${BUILDDIR}/desktop/magvis
+desktop: ${BUILDDIR}/desktop/vimag
 
-${BUILDDIR}/desktop/magvis: ${CPPFILES} ${HPPFILES}
+${BUILDDIR}/desktop/vimag: ${CPPFILES} ${HPPFILES}
 		mkdir -p ${BUILDDIR}/desktop
 		${CXX} ${CXXFLAGS} ${CPPFILES} -o $@ ${LDFLAGS}
 

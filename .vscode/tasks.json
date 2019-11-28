@@ -32,7 +32,7 @@
         {
             "type": "shell",
             "label": "run desktop version",
-            "command": "./build/desktop/magvis",
+            "command": "./build/desktop/vimag",
             "args": [],
             "options": {
                 "cwd": "${workspaceRoot}"
@@ -64,7 +64,7 @@
             "args": [
                 "-r",
                 "./build/web/*",
-                "jeroen@dynamag:/srv/www/magvis"
+                "jeroen@dynamag:/srv/www/vimag"
             ],
             "options": {
                 "cwd": "${workspaceRoot}"

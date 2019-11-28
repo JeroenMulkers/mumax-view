@@ -146,7 +146,7 @@ int main() {
   glfwWindowHint(GLFW_SAMPLES, 16);  // anti-aliasing
   glfwWindowHint(GLFW_RESIZABLE, true);
 
-  window = glfwCreateWindow(width, height, "magvis", NULL, NULL);
+  window = glfwCreateWindow(width, height, "ViMag", NULL, NULL);
 
   if (!window) {
     std::cerr << "Can not create window" << std::endl;

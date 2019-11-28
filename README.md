@@ -1,0 +1,1 @@
+[ViMag](http://dynamag.ugent.be/vimag) is a web app to visualize OVF files. The app is not yet officially released and is still under heavy development.
