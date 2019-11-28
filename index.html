@@ -4,58 +4,56 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="slider.css">
 
     <style>
-        body {
-            padding: 10px;
-        }
-
-        #controlmenu {
-            width: 400px;
-        }
-
         canvas.emscripten {
+            left: 0;
+            top: 0;
             position: absolute;
-            top: 0px;
-            left: 0px;
-            margin: 0px;
-            border: 0px none;
             background-color: black;
             width: 100%;
             height: 100%;
             z-index: -1;
         }
 
-        /* Style the tab */
+        #controlmenu {
+            padding: 20px;
+            width: 400px;
+        }
+
         .tab {
+            border-radius: 10px;
             background-color: rgba(200, 200, 200, 0.8);
             margin-bottom: 5px;
         }
 
-        /* Style the buttons inside the tab */
         .tab button {
+            border-radius: 10px;
             background-color: transparent;
             margin: 0px;
             border: none;
-            outline: none;
             cursor: pointer;
             padding: 12px 10px;
             transition: 0.3s;
             font-size: 0.9em;
         }
 
-        /* Change background color of buttons on hover */
         .tab button:hover {
             background-color: #ddd;
         }
 
-        /* Create an active/current tablink class */
         .tab button.active {
+            outline: none;
+            background-color: #ccc;
+        }
+
+        .tab button::-moz-focus-inner {
+            border: 0;
             background-color: #ccc;
         }
 
         .tabcontent {
+            border-radius: 10px;
             background-color: rgba(200, 200, 200, 0.8);
             display: none;
             padding: 12px 12px;
@@ -65,20 +63,20 @@
         }
 
         .colorbox {
+            cursor: pointer;
+            border: 1px solid black;
+            border-radius: 0.3em;
             display: inline-block;
-            margin-bottom: -10px;
+            width: 20px;
+            height: 1em;
         }
 
         .gradient {
-            margin: 0px;
+            display: inline-block;
         }
 
         input[type="color"] {
-            opacity: 0;
-            display: block;
-            width: 30px;
-            height: 15px;
-            border: none;
+            display: none;
         }
     </style>
 </head>
@@ -89,25 +87,30 @@
 
     <div id="controlmenu">
 
+
         <div class="tab">
             <button class="tablinks" onclick="toggleTab(event, 'magnetization')">Magnetization</button>
             <button class="tablinks" onclick="toggleTab(event, 'arrows')">Arrows</button>
             <button class="tablinks" onclick="toggleTab(event, 'colors')">Colors</button>
-            <!--
-        <button onclick="Module.requestFullscreen(false, true)">Fullscreen</button>
-        -->
-            <button class="tablinks" onclick="toggleTab(event, 'about')" style="float:right">About</button>
+            <button class="tablinks" onclick="toggleTab(event, 'about')" id="aboutButton"
+                style="float:right">About</button>
         </div>
+
+
+
+        <!---- MAGNETIZATION TAB ---->
 
         <div id="magnetization" class="tabcontent">
             Load an OVF1_TEXT file
-            <input type="file" id="files" name="files[]" />
+            <input type="file" id="loadovf" />
         </div>
 
 
 
+        <!---- ARROW TAB ---->
+
         <div id="arrows" class="tabcontent">
-            <input type="range" min="0.01" max="1" step=0.01 value="1"
+            <input type="range" min="0.01" max="1.5" step=0.01 value="1"
                 oninput="Module._updateArrowScalingsFactor(this.value)">
             Scalings factor
 
@@ -132,68 +135,90 @@
 
 
 
+        <!---- COLORS TAB ---->
+
         <div id="colors" class="tabcontent">
-            <div class="colorbox" id="backgroundColorBox">
+            <p>
+                <b>Background color</b>
+                <span class="colorbox" id="backgroundColorBox"
+                    onclick="document.getElementById('backgroundColor').click()"></span>
+                </span>
                 <input type="color" id="backgroundColor" box="backgroundColorBox"
                     oninput="updateColorInputBox(this);setBackgroundColor(this.value)">
-            </div>
-            Background color
+            </p>
 
-            <br>
 
-            <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setAmbientLight(this.value)">
-            Ambient lighting
+            <p>
+                <b>Lighting</b>
+                <br>
+                <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setAmbientLight(this.value)">
+                Ambient
+                <br>
+                <input type="range" min="0" max="1" step=0.01 value="0.5"
+                    oninput="Module._setSpecularLight(this.value)">
+                Specular
+            </p>
 
-            <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setSpecularLight(this.value)">
-            Specular lighting
+            <p>
+                <b>Colorscheme</b>
+                <br>
+                <input type="radio" name="colorscheme" value="mumax3" oninput="setMumaxColorScheme()" checked>
+                Mumax3
+                <br>
+                <input type="radio" name="colorscheme" value="gradient" id="gradientRadioButton"
+                    oninput="setGradientColorScheme()">
+                Gradient
+                <span class="gradient" id="gradient" style="display:none">
 
-            <br>
-
-            Colorscheme
-            <br>
-            <input type="radio" name="colorscheme" value="mumax3" oninput="setMumaxColorScheme()" checked>
-            Mumax3<br>
-
-            <input type="radio" name="colorscheme" value="gradient" id="gradientRadioButton"
-                oninput="setGradientColorScheme()">
-            Gradient
-            <div class="gradient" id="gradient" style="display:none">
-
-                <div class="colorbox" id="gradientPositiveColorBox">
+                    <span class="colorbox" id="gradientPositiveColorBox"
+                        onclick="document.getElementById('gradientPositiveColor').click()"></span>
                     <input type="color" id="gradientPositiveColor" value="#FF0000" box="gradientPositiveColorBox"
                         oninput="updateColorInputBox(this);setGradientColorScheme()">
-                </div>
 
-                <div class="colorbox" id="gradientZeroColorBox">
+                    <span class="colorbox" id="gradientZeroColorBox"
+                        onclick="document.getElementById('gradientZeroColor').click()"></span>
                     <input type="color" id="gradientZeroColor" value="#FFFFFF" box="gradientZeroColorBox"
                         oninput="updateColorInputBox(this);setGradientColorScheme()">
-                </div>
 
-                <div class="colorbox" id="gradientNegativeColorBox">
+                    <span class="colorbox" id="gradientNegativeColorBox"
+                        onclick="document.getElementById('gradientNegativeColor').click()"></span>
                     <input type="color" id="gradientNegativeColor" value="#0000FF" box="gradientNegativeColorBox"
                         oninput="updateColorInputBox(this);setGradientColorScheme()">
-                </div>
 
-            </div>
+                </span>
+
+            </p>
+
         </div>
+
+
+
+        <!---- ABOUT TAB ---->
 
         <div id="about" class="tabcontent">
             <div>
-                Instructions
-                <ul>
-                    <li>Drag with left mouse button to rotate</li>
-                    <li>Scroll to zoom</li>
-                </ul>
-
-                If the web app does not work, try again with another modern browser.
+                <p>
+                    Instructions
+                    <ul>
+                        <li>Drag with left mouse button to rotate</li>
+                        <li>Scroll to zoom</li>
+                    </ul>
+                    If the web app does not work, try again with another modern browser.
+                </p>
+                <p>
+                    The source code of magvis can be found on <a
+                        href="https://github.com/jeroenmulkers/magvis">github</a>.
+                    All contributions are welcome.
+                </p>
             </div>
         </div>
+
+
+
 
 
 
         <script>
-
-
             function toggleTab(evt, tabName) {
                 var wasOpen = document.getElementById(tabName).style.display == "block";
                 closeTabs();
@@ -251,6 +276,7 @@
                 box.style.backgroundColor = color;
             }
 
+            document.getElementById("aboutButton").click();
             updateColorInputBox(document.getElementById("backgroundColor"));
             updateColorInputBox(document.getElementById("gradientPositiveColor"));
             updateColorInputBox(document.getElementById("gradientZeroColor"));
@@ -282,7 +308,7 @@
                 reader.readAsArrayBuffer(file);
             }
             Module.onRuntimeInitialized = function () {
-                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+                document.getElementById('loadovf').addEventListener('change', handleFileSelect, false);
                 window.addEventListener('resize', function () { Module._updateCanvasSize(); }, false);
                 document.getElementById('canvas').addEventListener('mousedown', closeTabs, false);
             }
