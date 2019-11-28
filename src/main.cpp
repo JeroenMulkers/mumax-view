@@ -22,10 +22,12 @@ void main_loop() {
 // TODO: put mouse and window in a descent window class
 class Mouse {
  public:
+  Mouse() : scrollSensitivity(0.1){};
   bool leftButtonDown;
   bool middleButtonDown;
   double lastX;
   double lastY;
+  double scrollSensitivity;
 };
 Mouse mouse;
 GLFWwindow* window;
@@ -34,6 +36,10 @@ FieldRenderer* renderer;
 
 extern "C" {
 #ifdef __EMSCRIPTEN__
+EMSCRIPTEN_KEEPALIVE
+void setScrollSensitivity(double sensitivity) {
+  mouse.scrollSensitivity = sensitivity;
+}
 EMSCRIPTEN_KEEPALIVE
 void updateArrowShaftRadius(float r) {
   renderer->arrow.setShaftRadius(r);
@@ -204,9 +210,8 @@ void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
   renderer->needRender = true;
-  renderer->camera.targetDistance *= (1 - 0.1 * (float)yoffset);
-  // camera.position += (float)yoffset * 0.1f * (camera.target -
-  // camera.position);
+  renderer->camera.targetDistance *=
+      (1.0 - static_cast<float>(mouse.scrollSensitivity * yoffset));
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
