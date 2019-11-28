@@ -315,10 +315,12 @@
 
                 // The scroll sensitivity in glfw is different for firefox and chrome
                 if (navigator.userAgent.indexOf("Chrome") != -1) {
-                    Module._setScrollSensitivity(0.003);
+                    Module._setScrollSensitivity(-0.003);
                 } else if (navigator.userAgent.indexOf("Firefox") != -1) {
                     Module._setScrollSensitivity(-0.1);
-                } else { // TODO: test other browsers
+                } else if (navigator.userAgent.indexOf("Edge") != -1) {
+                    Module._setScrollSensitivity(0.1);
+                } else {
                     Module._setScrollSensitivity(-0.1);
                 }
             }
