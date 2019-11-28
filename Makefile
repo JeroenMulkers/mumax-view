@@ -14,8 +14,8 @@ EMCXXFLAGS=-std=c++14 \
 			-s USE_GLFW=3 \
 			-I/usr/include/glm/
 
-CPPFILES=main.cpp arrowmodel.cpp field.cpp 
-HPPFILES=arrowmodel.hpp camera.hpp field.hpp shaderprogram.hpp shaders.hpp fieldrenderer.hpp
+CPPFILES=$(wildcard src/*.cpp)
+HPPFILES=$(wildcard src/*.hpp)
 
 
 .PHONY: all
