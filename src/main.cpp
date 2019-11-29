@@ -89,13 +89,8 @@ void setBackgroundColor(float r, float g, float b) {
   renderer->needRender = true;
 }
 EMSCRIPTEN_KEEPALIVE
-void setSpecularLight(float intensity) {
-  renderer->shader.setFloat("specularStrength", intensity);
-  renderer->needRender = true;
-}
-EMSCRIPTEN_KEEPALIVE
-void setAmbientLight(float intensity) {
-  renderer->shader.setFloat("ambient", intensity);
+void setAmbientLighting(float intensity) {
+  renderer->shader.setFloat("ambientLight", intensity);
   renderer->needRender = true;
 }
 EMSCRIPTEN_KEEPALIVE

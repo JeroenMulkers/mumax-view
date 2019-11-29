@@ -150,14 +150,9 @@
 
 
             <p>
-                <b>Lighting</b>
-                <br>
-                <input type="range" min="0" max="1" step=0.01 value="0.5" oninput="Module._setAmbientLight(this.value)">
-                Ambient
-                <br>
+                <b>Ambient light</b>
                 <input type="range" min="0" max="1" step=0.01 value="0.5"
-                    oninput="Module._setSpecularLight(this.value)">
-                Specular
+                    oninput="Module._setAmbientLighting(this.value)">
             </p>
 
             <p>

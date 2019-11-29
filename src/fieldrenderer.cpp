@@ -72,15 +72,9 @@ void FieldRenderer::initShader() {
   shader.attachShader(vertexshader, GL_VERTEX_SHADER);
   shader.attachShader(fragmentshader, GL_FRAGMENT_SHADER);
   shader.link();
-
   // hard coded lightning values
-  glm::vec3 lightDirection = glm::vec3(1.0f, 0.5f, -1.0f);
-  float ambientLightStrength = 0.1;
-  float specularLightStrength = 0.5;
-
-  shader.setVec3("lightDir", lightDirection);
-  shader.setFloat("ambient", ambientLightStrength);
-  shader.setFloat("specularStrength", specularLightStrength);
+  float ambientLight = 0.1;
+  shader.setFloat("ambientLight", ambientLight);
 };
 
 void FieldRenderer::initVertexArray() {

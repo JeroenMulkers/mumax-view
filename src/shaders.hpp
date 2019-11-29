@@ -141,24 +141,14 @@ varying vec3 FragPos;
 varying vec3 Color;  
 
 uniform vec3 viewPos;
-uniform vec3 lightDir; 
-uniform float ambient;
-uniform float specularStrength;
+uniform float ambientLight;
 
 void main()
 {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 lightDirNormalized = -viewDir; // light behind camera
-    // vec3 lightDirNormalized = normalize(lightDir); // fixed light position
-
-    float diffuse = max(dot(-norm, lightDirNormalized), 0.0);
-
-    vec3 reflectDir = reflect(lightDirNormalized, norm);  
-    float specular = specularStrength * pow(max(dot(viewDir, reflectDir), 0.0), 32.);
-            
-    vec3 fragColor = (ambient + diffuse + specular) * Color;
-
+    float diffuse = max(dot(norm, viewDir), 0.0);
+    vec3 fragColor = (ambientLight + (1.0-ambientLight)*diffuse) * Color;
     gl_FragColor = vec4(fragColor, 1.0);
 }
 )";
