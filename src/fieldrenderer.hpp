@@ -17,12 +17,10 @@ class FieldRenderer {
   void setField(Field* field);
   void setGradientColorScheme(glm::mat3 gradient);
   void setMumaxColorScheme();
-  void setAspectRatio(float aspect);
   void initShader();
   void initVertexArray();
   void updateFieldAttribPointers();
   void resetCamera();
-  void updateProjectionMatrix();
   void updateFieldVBOs();
 
   void render();
@@ -30,8 +28,6 @@ class FieldRenderer {
   glm::mat3 colorGradient() const;
   int nRenderings() const;
   ColorSchemeType colorSchemeType() const;
-  unsigned int positionVBO() const;
-  unsigned int vectorsVBO() const;
 
   Field* field_;
   Arrow arrow;

@@ -19,7 +19,6 @@ FieldRenderer::FieldRenderer(Field* field)
   initVertexArray();
   setField(field);
   resetCamera();
-  updateProjectionMatrix();
   shader.use();  // TODO: check why this is needed here
   setMumaxColorScheme();
 }
@@ -63,14 +62,6 @@ void FieldRenderer::updateFieldVBOs() {
   glBindBuffer(GL_ARRAY_BUFFER, positionVBO_);
   glBufferData(GL_ARRAY_BUFFER, bufferSize, &field_->positions[0],
                GL_STATIC_DRAW);
-}
-
-unsigned int FieldRenderer::positionVBO() const {
-  return positionVBO_;
-}
-
-unsigned int FieldRenderer::vectorsVBO() const {
-  return vectorsVBO_;
 }
 
 glm::mat3 FieldRenderer::colorGradient() const {
@@ -132,7 +123,7 @@ void FieldRenderer::updateFieldAttribPointers() {
 };
 
 void FieldRenderer::render() {
-  updateProjectionMatrix();
+  shader.setMat4("projection", camera.projectionMatrix());
   shader.setFloat("ArrowScalingsFactor", arrowScalingsFactor);
   shader.setMat4("view", camera.viewMatrix());
   shader.setVec3("viewPos", camera.position());
@@ -152,27 +143,6 @@ void FieldRenderer::resetCamera() {
                               (field_->gridsize().y - 1) / 2.0, 0.0f);
   }
 };
-
-void FieldRenderer::updateProjectionMatrix() {
-  int vp[4];
-  glGetIntegerv(GL_VIEWPORT, vp);
-  int width = vp[2] - vp[0];
-  int height = vp[3] - vp[1];
-  float aspect = static_cast<float>(width) / static_cast<float>(height);
-  float nearCut = 0.1;
-  float fovy = glm::radians(45.0f);
-  glm::mat4 projection = glm::infinitePerspective(fovy, aspect, nearCut);
-  shader.setMat4("projection", projection);
-  needRender = true;
-}
-
-void FieldRenderer::setAspectRatio(float aspect) {
-  float nearCut = 0.1;
-  float fovy = glm::radians(45.0f);
-  glm::mat4 projection = glm::infinitePerspective(fovy, aspect, nearCut);
-  shader.setMat4("projection", projection);
-  needRender = true;
-}
 
 int FieldRenderer::nRenderings() const {
   return nRenderings_;

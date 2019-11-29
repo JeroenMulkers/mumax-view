@@ -27,6 +27,17 @@ class Camera {
 
   glm::mat4 viewMatrix() { return glm::lookAt(position(), target, up()); }
 
+  glm::mat4 projectionMatrix() {
+    int vp[4];
+    glGetIntegerv(GL_VIEWPORT, vp);
+    int width = vp[2] - vp[0];
+    int height = vp[3] - vp[1];
+    float aspect = static_cast<float>(width) / static_cast<float>(height);
+    float nearCut = 0.1;
+    float fovy = glm::radians(45.0f);
+    return glm::infinitePerspective(fovy, aspect, nearCut);
+  }
+
   float targetDistance;
   float yaw, pitch;
   glm::vec3 target;
