@@ -127,11 +127,12 @@ void setMumaxColorScheme() {
 }
 
 // ------- GLFW CALLBACKS ------------------------------------------------------
-void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
-void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-void curserPosCallback(GLFWwindow* window, double xpos, double ypos);
+void frameBufferSizeCallback(GLFWwindow* w, int width, int height);
+void scrollCallback(GLFWwindow* w, double xoffset, double yoffset);
+void mouseButtonCallback(GLFWwindow* w, int button, int action, int mods);
+void curserPosCallback(GLFWwindow* w, double xpos, double ypos);
 void errorCallback(int error, const char* description);
+void keyCallBack(GLFWwindow* w, int key, int scancode, int action, int mods);
 
 int main() {
   // ------- INIT GLFW ---------------------------------------------------------
@@ -171,6 +172,7 @@ int main() {
   glfwSetScrollCallback(window, scrollCallback);
   glfwSetMouseButtonCallback(window, mouseButtonCallback);
   glfwSetCursorPosCallback(window, curserPosCallback);
+  glfwSetKeyCallback(window, keyCallBack);
 
   // -------- GL SETTINGS --------------------------------------------------
 
@@ -212,6 +214,41 @@ int main() {
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
   renderer->needRender = true;
   glViewport(0, 0, width, height);
+}
+
+void keyCallBack(GLFWwindow* window,
+                 int key,
+                 int scancode,
+                 int action,
+                 int mods) {
+  if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+    if (mods == 0) {
+      renderer->camera.yaw = glm::pi<float>() / 2;
+    } else if (mods == 1) {
+      renderer->camera.yaw = -glm::pi<float>() / 2;
+    }
+    renderer->camera.pitch = 0;
+    renderer->needRender = true;
+
+  } else if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
+    if (mods == 0) {
+      renderer->camera.yaw = 0;
+    } else if (mods == 1) {
+      renderer->camera.yaw = glm::pi<float>();
+    }
+    renderer->camera.pitch = 0;
+    renderer->needRender = true;
+
+  } else if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
+    if (mods == 0) {
+      renderer->camera.pitch = glm::pi<float>() / 2;
+    } else if (mods == 1) {
+      renderer->camera.pitch = -glm::pi<float>() / 2;
+    }
+    renderer->camera.yaw = 0;
+    renderer->needRender = true;
+  }
+
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
