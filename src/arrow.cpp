@@ -1,4 +1,4 @@
-#include "arrowmodel.hpp"
+#include "arrow.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,19 +13,7 @@ Arrow::Arrow(float shaftRadius,
       headRadius_(headRadius),
       headRatio_(headRatio),
       nSegments_(nSegments) {
-  glGenBuffers(1, &VBO_);
   updateVBOdata();
-}
-
-void Arrow::updateVBOdata() {
-  auto triangles_ = triangles();
-  glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle) * nTriangles(), &triangles_[0],
-               GL_STATIC_DRAW);
-}
-
-Arrow::~Arrow() {
-  glDeleteBuffers(1, &VBO_);
 }
 
 void Arrow::setShaftRadius(float shaftRadius) {
@@ -60,10 +48,6 @@ int Arrow::nTriangles() const {
   } else {  // only head
     return nHeadTriangles;
   }
-}
-
-int Arrow::nVertices() const {
-  return 3 * nTriangles();  // Each triangle consists out of 3 vertices
 }
 
 std::vector<Triangle> Arrow::triangles() const {
@@ -112,8 +96,4 @@ std::vector<Triangle> Arrow::triangles() const {
                          Vertex{{0, 0, 0.5 - headRatio_}, -e_z}});
   }
   return v;
-}
-
-unsigned int Arrow::VBO() const {
-  return VBO_;
 }

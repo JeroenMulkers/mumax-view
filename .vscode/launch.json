@@ -8,7 +8,7 @@
             "name": "debug desktop version",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/build/desktop/magvis",
+            "program": "${workspaceRoot}/build/desktop/vimag",
             "args": [],
             "cwd": "${workspaceFolder}",
             "environment": [

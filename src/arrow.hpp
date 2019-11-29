@@ -1,26 +1,13 @@
 #pragma once
 
-#include <GLES3/gl3.h>
-#include <glm/glm.hpp>
 #include <vector>
 
-struct Vertex {
-  glm::vec3 position;
-  glm::vec3 normal;
-};
+#include "glyph.hpp"
 
-struct Triangle {
-  Vertex v1;
-  Vertex v2;
-  Vertex v3;
-};
-
-class Arrow {
+class Arrow : public Glyph {
  public:
   Arrow(float shaftRadius, float headRadius, float headRatio, int nSegments);
-  ~Arrow();
 
-  void updateVBOdata();
   void setShaftRadius(float shaftRadius);
   void setHeadRadius(float headRadius);
   void setHeadRatio(float headRatio);
@@ -29,13 +16,10 @@ class Arrow {
   std::vector<Triangle> triangles() const;
   bool hasShaft() const;
   int nTriangles() const;
-  int nVertices() const;
-  unsigned int VBO() const;
 
  private:
   float shaftRadius_;
   float headRadius_;
   float headRatio_;
   int nSegments_;
-  unsigned int VBO_;
 };

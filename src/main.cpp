@@ -41,6 +41,14 @@ void setScrollSensitivity(double sensitivity) {
   mouse.scrollSensitivity = sensitivity;
 }
 EMSCRIPTEN_KEEPALIVE
+void useArrowGlyph() {
+  renderer->setGlyphType(ARROW);
+}
+EMSCRIPTEN_KEEPALIVE
+void useCuboidGlyph() {
+  renderer->setGlyphType(CUBOID);
+}
+EMSCRIPTEN_KEEPALIVE
 void updateArrowShaftRadius(float r) {
   renderer->arrow.setShaftRadius(r);
   renderer->needRender = true;
@@ -57,8 +65,11 @@ void updateArrowHeadRatio(float r) {
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowScalingsFactor(float s) {
-  renderer->arrowScalingsFactor = s;
-  renderer->needRender = true;
+  renderer->setArrowScalingsFactor(s);
+}
+EMSCRIPTEN_KEEPALIVE
+void updateCuboidScalingsFactor(float s) {
+  renderer->setCuboidScalingsFactor(s);
 }
 EMSCRIPTEN_KEEPALIVE
 void loadfile(std::string filename) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GLES3/gl3.h>
 #include <glm/glm.hpp>
 
 #define PI 3.2415
@@ -41,6 +42,4 @@ class Camera {
   float targetDistance;
   float yaw, pitch;
   glm::vec3 target;
-
-  // glm::vec3 position;
 };

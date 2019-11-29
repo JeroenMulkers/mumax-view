@@ -85,13 +85,20 @@
 <body>
 
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+    <script>
+        var Module = {
+            canvas: document.getElementById('canvas')
+        };
+    </script>
+    <script src="index.js"></script>
+
 
     <div id="controlmenu">
 
 
         <div class="tab">
             <button class="tablinks" onclick="toggleTab(event, 'magnetization')">Magnetization</button>
-            <button class="tablinks" onclick="toggleTab(event, 'arrows')">Arrows</button>
+            <button class="tablinks" onclick="toggleTab(event, 'glyphs')">Glyphs</button>
             <button class="tablinks" onclick="toggleTab(event, 'colors')">Colors</button>
             <button class="tablinks" onclick="toggleTab(event, 'about')" id="aboutButton"
                 style="float:right">About</button>
@@ -108,30 +115,40 @@
 
 
 
-        <!-- ARROW TAB -->
+        <!-- GLYPH TAB -->
 
-        <div id="arrows" class="tabcontent">
-            <input type="range" min="0.01" max="1.5" step=0.01 value="1"
-                oninput="Module._updateArrowScalingsFactor(this.value)">
-            Scalings factor
+        <div id="glyphs" class="tabcontent">
+
+            <input type="radio" name="glyphType" value="Arrows" oninput="useArrowGlyph()" checked> Arrows
+
+            <div id="arrowProps">
+                <input type="range" min="0.01" max="1.5" step=0.01 value="1"
+                    oninput="Module._updateArrowScalingsFactor(this.value)">
+                Scalings factor
+                <br>
+                <input type="range" min="0.05" max="1" step=0.01 value="0.1"
+                    oninput="Module._updateArrowHeadRatio(this.value)">
+                Head ratio
+                <br>
+                <input type="range" min="0" max="0.2" step=0.01 value="0.1"
+                    oninput="Module._updateArrowShaftRadius(this.value)">
+                Shaft radius
+                <br>
+                <input type="range" min="0" max="0.5" step=0.01 value="0.1"
+                    oninput="Module._updateArrowHeadRadius(this.value)">
+                Head radius
+
+            </div>
 
             <br>
 
-            <input type="range" min="0.05" max="1" step=0.01 value="0.1"
-                oninput="Module._updateArrowHeadRatio(this.value)">
-            Head ratio
+            <input type="radio" name="glyphType" value="Cuboids" oninput="useCuboidGlyph()"> Cuboids
 
-            <br>
-
-            <input type="range" min="0" max="0.2" step=0.01 value="0.1"
-                oninput="Module._updateArrowShaftRadius(this.value)">
-            Shaft radius
-
-            <br>
-
-            <input type="range" min="0" max="0.5" step=0.01 value="0.1"
-                oninput="Module._updateArrowHeadRadius(this.value)">
-            Head radius
+            <div id="cuboidProps" style="display:none">
+                <input type="range" min="0.01" max="1.0" step=0.01 value="1"
+                    oninput="Module._updateCuboidScalingsFactor(this.value)">
+                Scalings factor
+            </div>
         </div>
 
 
@@ -208,118 +225,118 @@
                 </p>
             </div>
         </div>
+    </div>
 
 
 
-
-
-
-        <script>
-            function toggleTab(evt, tabName) {
-                var wasOpen = document.getElementById(tabName).style.display == "block";
-                closeTabs();
-                if (!wasOpen) {
-                    document.getElementById(tabName).style.display = "block";
-                    evt.currentTarget.className += " active";
-                }
+    <script>
+        function toggleTab(evt, tabName) {
+            var wasOpen = document.getElementById(tabName).style.display == "block";
+            closeTabs();
+            if (!wasOpen) {
+                document.getElementById(tabName).style.display = "block";
+                evt.currentTarget.className += " active";
             }
+        }
 
-            function closeTabs() {
-                var i, tabcontent, tablinks;
-                tabcontent = document.getElementsByClassName("tabcontent");
-                for (i = 0; i < tabcontent.length; i++) {
-                    tabcontent[i].style.display = "none";
-                }
-                tablinks = document.getElementsByClassName("tablinks");
-                for (i = 0; i < tablinks.length; i++) {
-                    tablinks[i].className = tablinks[i].className.replace(" active", "");
-                }
+        function closeTabs() {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
             }
-
-            function hexColorToRGBnormalized(hex) {
-                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                return {
-                    r: parseInt(result[1], 16) / 255,
-                    g: parseInt(result[2], 16) / 255,
-                    b: parseInt(result[3], 16) / 255
-                };
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
+        }
 
-            function setBackgroundColor(hex) {
-                var color = hexColorToRGBnormalized(hex);
-                Module._setBackgroundColor(color.r, color.g, color.b);
-            }
-
-            function setMumaxColorScheme() {
-                document.getElementById("gradient").style.display = "none";
-                Module._setMumaxColorScheme()
-            }
-
-            function setGradientColorScheme() {
-                document.getElementById("gradient").style.display = "inline-block";
-                var posColor = hexColorToRGBnormalized(document.getElementById("gradientPositiveColor").value);
-                var nulColor = hexColorToRGBnormalized(document.getElementById("gradientZeroColor").value);
-                var negColor = hexColorToRGBnormalized(document.getElementById("gradientNegativeColor").value);
-                Module._setGradientColorScheme(
-                    posColor.r, posColor.g, posColor.b,
-                    nulColor.r, nulColor.g, nulColor.b,
-                    negColor.r, negColor.g, negColor.b);
-            }
-
-            function updateColorInputBox(colorInput) {
-                var color = colorInput.value;
-                var box = document.getElementById(colorInput.getAttribute("box"))
-                box.style.backgroundColor = color;
-            }
-
-            document.getElementById("aboutButton").click();
-            updateColorInputBox(document.getElementById("backgroundColor"));
-            updateColorInputBox(document.getElementById("gradientPositiveColor"));
-            updateColorInputBox(document.getElementById("gradientZeroColor"));
-            updateColorInputBox(document.getElementById("gradientNegativeColor"));
-
-        </script>
-
-
-        <script type='text/javascript'>
-            var Module = {
-                canvas: document.getElementById('canvas')
+        function hexColorToRGBnormalized(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return {
+                r: parseInt(result[1], 16) / 255,
+                g: parseInt(result[2], 16) / 255,
+                b: parseInt(result[3], 16) / 255
             };
-        </script>
+        }
 
-        <script src="index.js"></script>
-        <script>
-            var loadFile = Module.cwrap("loadfile", null, ["string"]);
-            function handleFileSelect(evt) {
-                var files = evt.target.files;
-                var file = files[0];
-                var reader = new FileReader();
-                reader.onload = function () {
-                    var buffer = new Uint8Array(reader.result);
-                    FS.createDataFile('/', "config", buffer, true, true, true);
-                    buffer = [];
-                    loadFile("/config");
-                    FS.unlink("/config");
-                }
-                reader.readAsArrayBuffer(file);
-            }
-            Module.onRuntimeInitialized = function () {
-                document.getElementById('loadovf').addEventListener('change', handleFileSelect, false);
-                window.addEventListener('resize', function () { Module._updateCanvasSize(); }, false);
-                document.getElementById('canvas').addEventListener('mousedown', closeTabs, false);
+        function setBackgroundColor(hex) {
+            var color = hexColorToRGBnormalized(hex);
+            Module._setBackgroundColor(color.r, color.g, color.b);
+        }
 
-                // The scroll sensitivity in glfw is different for firefox and chrome
-                if (navigator.userAgent.indexOf("Chrome") != -1) {
-                    Module._setScrollSensitivity(-0.003);
-                } else if (navigator.userAgent.indexOf("Firefox") != -1) {
-                    Module._setScrollSensitivity(-0.1);
-                } else if (navigator.userAgent.indexOf("Edge") != -1) {
-                    Module._setScrollSensitivity(0.1);
-                } else {
-                    Module._setScrollSensitivity(-0.1);
-                }
+        function setMumaxColorScheme() {
+            document.getElementById("gradient").style.display = "none";
+            Module._setMumaxColorScheme()
+        }
+
+        function setGradientColorScheme() {
+            document.getElementById("gradient").style.display = "inline-block";
+            var posColor = hexColorToRGBnormalized(document.getElementById("gradientPositiveColor").value);
+            var nulColor = hexColorToRGBnormalized(document.getElementById("gradientZeroColor").value);
+            var negColor = hexColorToRGBnormalized(document.getElementById("gradientNegativeColor").value);
+            Module._setGradientColorScheme(
+                posColor.r, posColor.g, posColor.b,
+                nulColor.r, nulColor.g, nulColor.b,
+                negColor.r, negColor.g, negColor.b);
+        }
+
+        function updateColorInputBox(colorInput) {
+            var color = colorInput.value;
+            var box = document.getElementById(colorInput.getAttribute("box"))
+            box.style.backgroundColor = color;
+        }
+
+        function useArrowGlyph() {
+            document.getElementById("cuboidProps").style.display = "none";
+            document.getElementById("arrowProps").style.display = "block";
+            Module._useArrowGlyph()
+        }
+
+        function useCuboidGlyph() {
+            document.getElementById("arrowProps").style.display = "none";
+            document.getElementById("cuboidProps").style.display = "block";
+            Module._useCuboidGlyph()
+        }
+
+        document.getElementById("aboutButton").click();
+        updateColorInputBox(document.getElementById("backgroundColor"));
+        updateColorInputBox(document.getElementById("gradientPositiveColor"));
+        updateColorInputBox(document.getElementById("gradientZeroColor"));
+        updateColorInputBox(document.getElementById("gradientNegativeColor"));
+
+        var loadFile = Module.cwrap("loadfile", null, ["string"]);
+        function handleFileSelect(evt) {
+            var files = evt.target.files;
+            var file = files[0];
+            var reader = new FileReader();
+            reader.onload = function () {
+                var buffer = new Uint8Array(reader.result);
+                FS.createDataFile('/', "config", buffer, true, true, true);
+                buffer = [];
+                loadFile("/config");
+                FS.unlink("/config");
             }
-        </script>
+            reader.readAsArrayBuffer(file);
+        }
+
+        Module.onRuntimeInitialized = function () {
+            document.getElementById('loadovf').addEventListener('change', handleFileSelect, false);
+            window.addEventListener('resize', function () { Module._updateCanvasSize(); }, false);
+            document.getElementById('canvas').addEventListener('mousedown', closeTabs, false);
+
+            // The scroll sensitivity in glfw is different for firefox and chrome
+            if (navigator.userAgent.indexOf("Chrome") != -1) {
+                Module._setScrollSensitivity(-0.003);
+            } else if (navigator.userAgent.indexOf("Firefox") != -1) {
+                Module._setScrollSensitivity(-0.1);
+            } else if (navigator.userAgent.indexOf("Edge") != -1) {
+                Module._setScrollSensitivity(0.1);
+            } else {
+                Module._setScrollSensitivity(-0.1);
+            }
+        }
+    </script>
 
 </body>
 

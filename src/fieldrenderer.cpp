@@ -1,7 +1,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "arrowmodel.hpp"
+#include "arrow.hpp"
 #include "camera.hpp"
 #include "field.hpp"
 #include "fieldrenderer.hpp"
@@ -9,18 +9,25 @@
 #include "shaders.hpp"
 
 FieldRenderer::FieldRenderer(Field* field)
-    : arrow(0.12, 0.2, 0.6, 40),
-      arrowScalingsFactor(1.0),
+    : cuboid(glm::vec3{1.0, 1.0, 1.0}),
+      arrow(0.12, 0.2, 0.6, 40),
       nRenderings_(0),
       needRender(true) {
   glGenBuffers(1, &vectorsVBO_);
   glGenBuffers(1, &positionVBO_);
+
   initShader();
   initVertexArray();
-  setField(field);
-  resetCamera();
   shader.use();  // TODO: check why this is needed here
+
+  setGlyphType(ARROW);
+  setCuboidScalingsFactor(1.0);
+  setArrowScalingsFactor(1.0);
   setMumaxColorScheme();
+
+  setField(field);
+
+  resetCamera();
 }
 
 FieldRenderer::~FieldRenderer() {
@@ -51,8 +58,37 @@ void FieldRenderer::setMumaxColorScheme() {
   needRender = true;
 };
 
+void FieldRenderer::setArrowScalingsFactor(float scalingsFactor) {
+  arrowScalingsFactor_ = scalingsFactor;
+  shader.setFloat("arrowScalingsFactor", scalingsFactor);
+  needRender = true;
+}
+
+void FieldRenderer::setCuboidScalingsFactor(float scalingsFactor) {
+  cuboidScalingsFactor_ = scalingsFactor;
+  shader.setFloat("cuboidScalingsFactor", scalingsFactor);
+  needRender = true;
+}
+
+void FieldRenderer::setGlyphType(GlyphType type) {
+  if (type == ARROW) {
+    glyph = &arrow;
+    shader.setBool("arrowGlyph", true);
+  } else {
+    glyph = &cuboid;
+    shader.setBool("arrowGlyph", false);
+  }
+  glyphType_ = type;
+  updateGlyphAttribPointers();
+  needRender = true;
+};
+
 ColorSchemeType FieldRenderer::colorSchemeType() const {
   return colorSchemeType_;
+};
+
+GlyphType FieldRenderer::glyphType() const {
+  return glyphType_;
 };
 
 void FieldRenderer::updateFieldVBOs() {
@@ -78,38 +114,50 @@ void FieldRenderer::initShader() {
 };
 
 void FieldRenderer::initVertexArray() {
-  aInstancePosLoc_ = glGetAttribLocation(shader.ID, "aInstancePos");
-  aInstanceVecLoc_ = glGetAttribLocation(shader.ID, "aInstanceVector");
   glGenVertexArrays(1, &VAO_);
   glBindVertexArray(VAO_);
 
+  int aGlyphPosLoc = glGetAttribLocation(shader.ID, "aPos");
+  glEnableVertexAttribArray(aGlyphPosLoc);
+
+  int aGlyphNormalLoc = glGetAttribLocation(shader.ID, "aNormal");
+  glEnableVertexAttribArray(aGlyphNormalLoc);
+
+  int aInstancePosLoc_ = glGetAttribLocation(shader.ID, "aInstancePos");
   glEnableVertexAttribArray(aInstancePosLoc_);
   glVertexAttribDivisor(aInstancePosLoc_, 1);
 
+  int aInstanceVecLoc_ = glGetAttribLocation(shader.ID, "aInstanceVector");
   glEnableVertexAttribArray(aInstanceVecLoc_);
   glVertexAttribDivisor(aInstanceVecLoc_, 1);
+}
 
-  // Arrow model triangles
-  int aPosLoc = glGetAttribLocation(shader.ID, "aPos");
-  glEnableVertexAttribArray(aPosLoc);
-  glBindBuffer(GL_ARRAY_BUFFER, arrow.VBO());
-  glVertexAttribPointer(aPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+void FieldRenderer::updateGlyphAttribPointers() {
+  glyph->updateVBOdata();
+  glBindVertexArray(VAO_);
+
+  int aGlyphPosLoc = glGetAttribLocation(shader.ID, "aPos");
+  glBindBuffer(GL_ARRAY_BUFFER, glyph->VBO());
+  glVertexAttribPointer(aGlyphPosLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void*)0);
 
-  // Arrow model normals
-  int aNormalLoc = glGetAttribLocation(shader.ID, "aNormal");
-  glEnableVertexAttribArray(aNormalLoc);
-  glBindBuffer(GL_ARRAY_BUFFER, arrow.VBO());
-  glVertexAttribPointer(aNormalLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  int aGlyphNormalLoc = glGetAttribLocation(shader.ID, "aNormal");
+  glBindBuffer(GL_ARRAY_BUFFER, glyph->VBO());
+  glVertexAttribPointer(aGlyphNormalLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void*)(sizeof(glm::vec3)));
+  needRender = true;
 }
 
 void FieldRenderer::updateFieldAttribPointers() {
   updateFieldVBOs();
   glBindVertexArray(VAO_);
+
+  int aInstancePosLoc_ = glGetAttribLocation(shader.ID, "aInstancePos");
   glBindBuffer(GL_ARRAY_BUFFER, positionVBO_);
   glVertexAttribPointer(aInstancePosLoc_, 3, GL_FLOAT, GL_FALSE,
                         sizeof(glm::vec3), (void*)0);
+
+  int aInstanceVecLoc_ = glGetAttribLocation(shader.ID, "aInstanceVector");
   glBindBuffer(GL_ARRAY_BUFFER, vectorsVBO_);
   glVertexAttribPointer(aInstanceVecLoc_, 3, GL_FLOAT, GL_FALSE,
                         sizeof(glm::vec3), (void*)0);
@@ -118,11 +166,10 @@ void FieldRenderer::updateFieldAttribPointers() {
 
 void FieldRenderer::render() {
   shader.setMat4("projection", camera.projectionMatrix());
-  shader.setFloat("ArrowScalingsFactor", arrowScalingsFactor);
   shader.setMat4("view", camera.viewMatrix());
   shader.setVec3("viewPos", camera.position());
   shader.use();
-  glDrawArraysInstanced(GL_TRIANGLES, 0, arrow.nVertices(),
+  glDrawArraysInstanced(GL_TRIANGLES, 0, glyph->nVertices(),
                         field_->ncells());  // needRender = false;
   needRender = false;
   nRenderings_++;

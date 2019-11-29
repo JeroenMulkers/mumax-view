@@ -21,9 +21,11 @@ uniform ivec3 gridsize;
 
 uniform mat4 view;
 uniform mat4 projection;
-uniform float ArrowScalingsFactor;
+uniform float arrowScalingsFactor;
+uniform float cuboidScalingsFactor;
 uniform mat3 colorGradient;
 uniform bool useColorGradient;
+uniform bool arrowGlyph;
 
 mat3 transInverse(mat3 a)  {
     mat3 b;
@@ -112,13 +114,22 @@ void main() {
     mat4 rotation = mat4(1.0);
     rotation = mat4(1.0) + skew + skew*skew*(1./(1.+vecDir.z));
 
-    float L = ArrowScalingsFactor * length(aInstanceVector);
-    mat4 scale = mat4(1.0);
-    scale[0][0] = L;
-    scale[1][1] = L;
-    scale[2][2] = L;
 
-    mat4 model = translation * rotation * scale;
+    mat4 model;
+    if (arrowGlyph) {
+        float L = arrowScalingsFactor * length(aInstanceVector);
+        mat4 scale = mat4(1.0);
+        scale[0][0] = L;
+        scale[1][1] = L;
+        scale[2][2] = L;
+        model = translation * rotation * scale;
+    } else {
+        mat4 scale = mat4(1.0);
+        scale[0][0] = cuboidScalingsFactor;
+        scale[1][1] = cuboidScalingsFactor;
+        scale[2][2] = cuboidScalingsFactor;
+        model = translation * scale; 
+    }
 
     FragPos = vec3(model * local);
     Normal = transInverse(mat3(model)) * aNormal;  
