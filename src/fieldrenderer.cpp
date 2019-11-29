@@ -13,6 +13,8 @@ FieldRenderer::FieldRenderer(Field* field)
       arrowScalingsFactor(1.0),
       nRenderings_(0),
       needRender(true) {
+  glGenBuffers(1, &vectorsVBO_);
+  glGenBuffers(1, &positionVBO_);
   initShader();
   initVertexArray();
   setField(field);
@@ -23,12 +25,15 @@ FieldRenderer::FieldRenderer(Field* field)
 }
 
 FieldRenderer::~FieldRenderer() {
+  glDeleteBuffers(1, &positionVBO_);
+  glDeleteBuffers(1, &vectorsVBO_);
   glDeleteBuffers(1, &VAO_);
 }
 
 void FieldRenderer::setField(Field* field) {
   field_ = field;
   resetCamera();
+  updateFieldVBOs();
   updateFieldAttribPointers();
   needRender = true;
 }
@@ -50,6 +55,23 @@ void FieldRenderer::setMumaxColorScheme() {
 ColorSchemeType FieldRenderer::colorSchemeType() const {
   return colorSchemeType_;
 };
+
+void FieldRenderer::updateFieldVBOs() {
+  int bufferSize = sizeof(glm::vec3) * field_->ncells();
+  glBindBuffer(GL_ARRAY_BUFFER, vectorsVBO_);
+  glBufferData(GL_ARRAY_BUFFER, bufferSize, &field_->data[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, positionVBO_);
+  glBufferData(GL_ARRAY_BUFFER, bufferSize, &field_->positions[0],
+               GL_STATIC_DRAW);
+}
+
+unsigned int FieldRenderer::positionVBO() const {
+  return positionVBO_;
+}
+
+unsigned int FieldRenderer::vectorsVBO() const {
+  return vectorsVBO_;
+}
 
 glm::mat3 FieldRenderer::colorGradient() const {
   return colorGradient_;
@@ -98,12 +120,12 @@ void FieldRenderer::initVertexArray() {
 }
 
 void FieldRenderer::updateFieldAttribPointers() {
-  field_->updateVBOs();
+  updateFieldVBOs();
   glBindVertexArray(VAO_);
-  glBindBuffer(GL_ARRAY_BUFFER, field_->positionVBO());
+  glBindBuffer(GL_ARRAY_BUFFER, positionVBO_);
   glVertexAttribPointer(aInstancePosLoc_, 3, GL_FLOAT, GL_FALSE,
                         sizeof(glm::vec3), (void*)0);
-  glBindBuffer(GL_ARRAY_BUFFER, field_->vectorsVBO());
+  glBindBuffer(GL_ARRAY_BUFFER, vectorsVBO_);
   glVertexAttribPointer(aInstanceVecLoc_, 3, GL_FLOAT, GL_FALSE,
                         sizeof(glm::vec3), (void*)0);
   needRender = true;

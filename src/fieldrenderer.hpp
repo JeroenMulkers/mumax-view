@@ -23,12 +23,15 @@ class FieldRenderer {
   void updateFieldAttribPointers();
   void resetCamera();
   void updateProjectionMatrix();
+  void updateFieldVBOs();
 
   void render();
 
   glm::mat3 colorGradient() const;
   int nRenderings() const;
   ColorSchemeType colorSchemeType() const;
+  unsigned int positionVBO() const;
+  unsigned int vectorsVBO() const;
 
   Field* field_;
   Arrow arrow;
@@ -38,6 +41,8 @@ class FieldRenderer {
   float arrowScalingsFactor;
 
  private:
+  unsigned int positionVBO_;
+  unsigned int vectorsVBO_;
   unsigned int VAO_;
   int aInstancePosLoc_;
   int aInstanceVecLoc_;

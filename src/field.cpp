@@ -24,16 +24,6 @@ Field::Field(glm::ivec3 gridsize) : gridsize_(gridsize) {
       }
     }
   }
-  glGenBuffers(1, &vectorsVBO_);
-  glGenBuffers(1, &positionVBO_);
-}
-
-void Field::updateVBOs() {
-  int bufferSize = sizeof(glm::vec3) * ncells();
-  glBindBuffer(GL_ARRAY_BUFFER, vectorsVBO_);
-  glBufferData(GL_ARRAY_BUFFER, bufferSize, &data[0], GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, positionVBO_);
-  glBufferData(GL_ARRAY_BUFFER, bufferSize, &positions[0], GL_STATIC_DRAW);
 }
 
 int Field::ncells() {
@@ -42,13 +32,6 @@ int Field::ncells() {
 
 glm::ivec3 Field::gridsize() {
   return gridsize_;
-}
-
-unsigned int Field::positionVBO() {
-  return positionVBO_;
-}
-unsigned int Field::vectorsVBO() {
-  return vectorsVBO_;
 }
 
 Field* readFieldFromOVF(std::string filename) {
