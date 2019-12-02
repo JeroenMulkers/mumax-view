@@ -1,3 +1,4 @@
+#include <fstream>
 #include <functional>
 #include <iostream>
 
@@ -32,6 +33,7 @@ class Mouse {
 Mouse mouse;
 GLFWwindow* window;
 
+Field* field;
 FieldRenderer* renderer;
 
 extern "C" {
@@ -73,9 +75,16 @@ void updateCuboidScalingsFactor(float s) {
 }
 EMSCRIPTEN_KEEPALIVE
 void loadfile(std::string filename) {
-  std::cout << filename << std::endl;
+  Field* field;
+  try {
+    field = readFieldFromOVF(filename);
+  } catch (const std::fstream::failure& e) {
+    delete field;
+    std::cerr << e.what() << std::endl;
+    return;
+  }
   Field* oldfield = renderer->field_;
-  renderer->setField(readFieldFromOVF(filename));
+  renderer->setField(field);
   delete oldfield;
 }
 EM_JS(int, canvas_get_width, (), {
@@ -134,7 +143,7 @@ void curserPosCallback(GLFWwindow* w, double xpos, double ypos);
 void errorCallback(int error, const char* description);
 void keyCallBack(GLFWwindow* w, int key, int scancode, int action, int mods);
 
-int main() {
+int main(int argc, char** argv) {
   // ------- INIT GLFW ---------------------------------------------------------
 
   glfwSetErrorCallback(errorCallback);
@@ -184,7 +193,24 @@ int main() {
 
   // -------- CREATE RENDERER ----------------------------------------------
 
-  renderer = new FieldRenderer(testField(glm::ivec3(50, 50, 1)));
+#ifdef __EMSCRIPTEN__
+  field = testField(glm::ivec3(50, 50, 1));
+#else
+  if (argc > 1) {
+    // std::string filename(argv[1]);
+    try {
+      field = readFieldFromOVF(argv[1]);
+    } catch (const std::fstream::failure& e) {
+      std::cerr << e.what() << std::endl;
+      return -1;
+    }
+
+  } else {
+    field = testField(glm::ivec3(50, 50, 1));
+  }
+#endif
+
+  renderer = new FieldRenderer(field);
 
   //--------- MAIN LOOP ----------------------------------------------------
 
@@ -248,7 +274,6 @@ void keyCallBack(GLFWwindow* window,
     renderer->camera.yaw = 0;
     renderer->needRender = true;
   }
-
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {

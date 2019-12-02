@@ -39,6 +39,9 @@ Field* readFieldFromOVF(std::string filename) {
   glm::ivec3 gridsize = {0, 0, 0};
 
   std::ifstream file(filename);
+  if (!file) {
+    throw std::ios::failure("Error reading file");
+  }
 
   std::regex headerRegex("^# (.*?): (.*?)$");
   std::smatch m;
