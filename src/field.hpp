@@ -20,5 +20,4 @@ class Field {
   glm::ivec3 gridsize_;
 };
 
-Field* readFieldFromOVF(std::string filename);
 Field* testField(glm::ivec3 gridsize);

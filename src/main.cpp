@@ -14,6 +14,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "fieldrenderer.hpp"
+#include "ovf.hpp"
 
 std::function<void()> loop;
 void main_loop() {

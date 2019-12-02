@@ -1,9 +1,5 @@
 #include "field.hpp"
 
-#include <fstream>
-#include <iostream>
-#include <regex>
-#include <string>
 #include <vector>
 
 #include <GLES3/gl3.h>
@@ -32,50 +28,6 @@ int Field::ncells() {
 
 glm::ivec3 Field::gridsize() {
   return gridsize_;
-}
-
-Field* readFieldFromOVF(std::string filename) {
-  Field* field = nullptr;
-  glm::ivec3 gridsize = {0, 0, 0};
-
-  std::ifstream file(filename);
-  if (!file) {
-    throw std::ios::failure("Error reading file");
-  }
-
-  std::regex headerRegex("^# (.*?): (.*?)$");
-  std::smatch m;
-
-  std::string line;
-  while (std::getline(file, line)) {
-    if (!std::regex_match(line, m, headerRegex))
-      continue;
-
-    std::string key = m[1];
-    std::string strValue = m[2];
-
-    if (!key.compare("xnodes"))
-      gridsize.x = std::stoi(strValue);
-    if (!key.compare("ynodes"))
-      gridsize.y = std::stoi(strValue);
-    if (!key.compare("znodes"))
-      gridsize.z = std::stoi(strValue);
-
-    if (!key.compare("Begin") && !strValue.compare("Data Text")) {
-      field = new Field(gridsize);
-      if (field->ncells() == 0) {
-        std::cout << "Field is empty" << std::endl;
-        return field;
-      }
-      for (auto& value : field->data) {
-        file >> value.x;
-        file >> value.y;
-        file >> value.z;
-      }
-      return field;
-    }
-  }
-  return field;
 }
 
 Field* testField(glm::ivec3 gridsize) {
