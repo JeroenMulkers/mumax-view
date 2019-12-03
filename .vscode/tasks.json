@@ -5,11 +5,9 @@
             "type": "shell",
             "label": "build desktop version",
             "command": "make",
-            "args": [
-                "desktop"
-            ],
+            "args": [],
             "options": {
-                "cwd": "${workspaceRoot}"
+                "cwd": "${workspaceRoot}/build/desktop"
             },
             "group": {
                 "kind": "build",
@@ -20,12 +18,12 @@
         {
             "type": "shell",
             "label": "build web version",
-            "command": "make",
+            "command": "emmake",
             "args": [
-                "web"
+                "make"
             ],
             "options": {
-                "cwd": "${workspaceRoot}"
+                "cwd": "${workspaceRoot}/build/web"
             },
             "problemMatcher": []
         },
