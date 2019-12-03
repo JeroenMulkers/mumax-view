@@ -9,14 +9,15 @@
 
 Field::Field() : Field(glm::ivec3(0, 0, 0)) {}
 
-Field::Field(glm::ivec3 gridsize) : gridsize_(gridsize) {
+Field::Field(glm::ivec3 gridsize, glm::vec3 cellsize)
+    : gridsize_(gridsize), cellsize(cellsize) {
   data.resize(ncells());
   positions.resize(ncells());
   for (int ix = 0; ix < gridsize.x; ix++) {
     for (int iy = 0; iy < gridsize.y; iy++) {
       for (int iz = 0; iz < gridsize.z; iz++) {
         int idx = iz * gridsize.x * gridsize.y + iy * gridsize.x + ix;
-        positions[idx] = {(float)ix, (float)iy, (float)iz};
+        positions[idx] = {ix * cellsize.x, iy * cellsize.y, iz * cellsize.z};
       }
     }
   }

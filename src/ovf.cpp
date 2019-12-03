@@ -26,6 +26,7 @@ static void readBinaryData(Field* field, std::ifstream& data) {
 Field* readFieldFromOVF(std::string filename) {
   Field* field = nullptr;
   glm::ivec3 gridsize = {0, 0, 0};
+  glm::vec3 cellsize = {0., 0., 0.};
 
   std::ifstream file(filename, std::ios::binary);
   if (!file) {
@@ -43,16 +44,29 @@ Field* readFieldFromOVF(std::string filename) {
     std::string key = m[1];
     std::string strValue = m[2];
 
-    if (!key.compare("xnodes"))
+    if (!key.compare("xnodes")) {
       gridsize.x = std::stoi(strValue);
-    if (!key.compare("ynodes"))
+    } else if (!key.compare("ynodes")) {
       gridsize.y = std::stoi(strValue);
-    if (!key.compare("znodes"))
+    } else if (!key.compare("znodes")) {
       gridsize.z = std::stoi(strValue);
+    } else if (!key.compare("xstepsize")) {
+      cellsize.x = std::stof(strValue);
+    } else if (!key.compare("ystepsize")) {
+      cellsize.y = std::stof(strValue);
+    } else if (!key.compare("zstepsize")) {
+      cellsize.z = std::stof(strValue);
+    } else if (!key.compare("Begin") && (!strValue.compare("Data Text") ||
+                                         !strValue.compare("Data Binary 4"))) {
+      float largestDim = cellsize.x;
+      if (cellsize.y > largestDim)
+        largestDim = cellsize.y;
+      if (cellsize.z > largestDim)
+        largestDim = cellsize.z;
+      cellsize = cellsize / largestDim;  // TODO: get rid of this hack-ish
+                                         // solution to get good scaling
 
-    if (!key.compare("Begin") && (!strValue.compare("Data Text") ||
-                                  !strValue.compare("Data Binary 4"))) {
-      field = new Field(gridsize);
+      field = new Field(gridsize, cellsize);
       if (!strValue.compare("Data Binary 4")) {
         readBinaryData(field, file);
       } else if (!strValue.compare("Data Text")) {
@@ -60,7 +74,6 @@ Field* readFieldFromOVF(std::string filename) {
       } else {
         throw "Data format not understood";
       }
-
       return field;
     }
   }

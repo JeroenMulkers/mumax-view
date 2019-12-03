@@ -41,6 +41,8 @@ void FieldRenderer::setField(Field* field) {
   resetCamera();
   updateFieldVBOs();
   updateFieldAttribPointers();
+  cuboid.setSize(field->cellsize);
+  cuboid.updateVBOdata();
   needRender = true;
 }
 
@@ -180,8 +182,10 @@ void FieldRenderer::resetCamera() {
   camera.yaw = 0.0;
   camera.pitch = 3.1415 / 10.;
   if (field_) {
-    camera.target = glm::vec3((field_->gridsize().x - 1) / 2.0,
-                              (field_->gridsize().y - 1) / 2.0, 0.0f);
+    camera.target =
+        glm::vec3(field_->cellsize.x * (field_->gridsize().x - 1) / 2.0,
+                  field_->cellsize.y * (field_->gridsize().y - 1) / 2.0,
+                  field_->cellsize.z * (field_->gridsize().z - 1) / 2.0);
   }
 };
 
