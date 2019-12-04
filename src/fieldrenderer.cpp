@@ -12,7 +12,6 @@ FieldRenderer::FieldRenderer(Field* field)
 
   initShader();
   initVertexArray();
-  shader.use();  // TODO: check why this is needed here
 
   setGlyphType(ARROW);
   setCuboidScalingsFactor(1.0);
