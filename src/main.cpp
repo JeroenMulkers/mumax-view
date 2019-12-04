@@ -15,6 +15,7 @@
 
 #include "fieldrenderer.hpp"
 #include "ovf.hpp"
+#include "scene.hpp"
 
 std::function<void()> loop;
 void main_loop() {
@@ -33,6 +34,8 @@ class Mouse {
 };
 Mouse mouse;
 GLFWwindow* window;
+
+Scene scene;
 
 Field* field;
 FieldRenderer* renderer;
@@ -54,17 +57,17 @@ void useCuboidGlyph() {
 EMSCRIPTEN_KEEPALIVE
 void updateArrowShaftRadius(float r) {
   renderer->arrow.setShaftRadius(r);
-  renderer->needRender = true;
+  renderer->ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRadius(float r) {
   renderer->arrow.setHeadRadius(r);
-  renderer->needRender = true;
+  renderer->ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRatio(float r) {
   renderer->arrow.setHeadRatio(r);
-  renderer->needRender = true;
+  renderer->ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowScalingsFactor(float s) {
@@ -107,12 +110,12 @@ void updateCanvasSize() {
 EMSCRIPTEN_KEEPALIVE
 void setBackgroundColor(float r, float g, float b) {
   glClearColor(r, g, b, 1.0f);
-  renderer->needRender = true;
+  scene.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void setAmbientLighting(float intensity) {
   renderer->shader.setFloat("ambientLight", intensity);
-  renderer->needRender = true;
+  scene.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void setGradientColorScheme(float r1,
@@ -126,12 +129,10 @@ void setGradientColorScheme(float r1,
                             float b3) {
   renderer->setGradientColorScheme(
       glm::mat3(r1, g1, b1, r2, g2, b2, r3, g3, b3));
-  renderer->needRender = true;
 }
 EMSCRIPTEN_KEEPALIVE
 void setMumaxColorScheme() {
   renderer->setMumaxColorScheme();
-  renderer->needRender = true;
 }
 #endif
 }
@@ -212,14 +213,18 @@ int main(int argc, char** argv) {
 #endif
 
   renderer = new FieldRenderer(field);
+  renderer->putOnScene(&scene);
 
   //--------- MAIN LOOP ----------------------------------------------------
 
   loop = [&] {
-    if (renderer->needRender) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      renderer->render();
+    if (scene.needRendering()) {
+      scene.render();
     }
+    // if (renderer->needRender) {
+    //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //  renderer->render();
+    //}
     glfwSwapBuffers(window);
     glfwPollEvents();  // alternative: glfwWaitEvents();
   };
@@ -239,7 +244,7 @@ int main(int argc, char** argv) {
 }
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
-  renderer->needRender = true;
+  scene.ensureRendering();
   glViewport(0, 0, width, height);
 }
 
@@ -250,37 +255,35 @@ void keyCallBack(GLFWwindow* window,
                  int mods) {
   if (key == GLFW_KEY_X && action == GLFW_PRESS) {
     if (mods == 0) {
-      renderer->camera.yaw = glm::pi<float>() / 2;
+      scene.camera()->setYaw(glm::pi<float>() / 2);
     } else if (mods == 1) {
-      renderer->camera.yaw = -glm::pi<float>() / 2;
+      scene.camera()->setYaw(-glm::pi<float>() / 2);
     }
-    renderer->camera.pitch = 0;
-    renderer->needRender = true;
+    scene.camera()->setPitch(0);
 
   } else if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
     if (mods == 0) {
-      renderer->camera.yaw = 0;
+      scene.camera()->setYaw(0);
     } else if (mods == 1) {
-      renderer->camera.yaw = glm::pi<float>();
+      scene.camera()->setYaw(glm::pi<float>());
     }
-    renderer->camera.pitch = 0;
-    renderer->needRender = true;
+    scene.camera()->setPitch(0);
 
   } else if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
     if (mods == 0) {
-      renderer->camera.pitch = glm::pi<float>() / 2;
+      scene.camera()->setPitch(glm::pi<float>() / 2);
     } else if (mods == 1) {
-      renderer->camera.pitch = -glm::pi<float>() / 2;
+      scene.camera()->setPitch(-glm::pi<float>() / 2);
     }
-    renderer->camera.yaw = 0;
-    renderer->needRender = true;
+    scene.camera()->setYaw(0);
   }
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-  renderer->needRender = true;
-  renderer->camera.targetDistance *=
-      (1.0 - static_cast<float>(mouse.scrollSensitivity * yoffset));
+  scene.ensureRendering();
+  float dist = scene.camera()->distance();
+  scene.camera()->setDistance(
+      dist * (1.0 - static_cast<float>(mouse.scrollSensitivity * yoffset)));
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
@@ -308,13 +311,13 @@ void curserPosCallback(GLFWwindow* window, double xpos, double ypos) {
   mouse.lastY = ypos;
 
   if (mouse.leftButtonDown) {
-    renderer->needRender = true;
     float sensitivity = 0.02;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
 
-    renderer->camera.yaw += xoffset;
-    renderer->camera.pitch -= yoffset;
+    float newYaw = scene.camera()->yaw() + sensitivity * xoffset;
+    float newPitch = scene.camera()->pitch() - sensitivity * yoffset;
+
+    scene.camera()->setYaw(newYaw);
+    scene.camera()->setPitch(newPitch);
   }
   // TODO: fix middle button feature
   // if (mouse.middleButtonDown) {

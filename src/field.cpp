@@ -13,11 +13,16 @@ Field::Field(glm::ivec3 gridsize, glm::vec3 cellsize)
     : gridsize_(gridsize), cellsize(cellsize) {
   data.resize(ncells());
   positions.resize(ncells());
+  glm::vec3 shift;
+  shift.x = -0.5 * cellsize.x * gridsize.x;
+  shift.y = -0.5 * cellsize.y * gridsize.y;
+  shift.z = -0.5 * cellsize.z * gridsize.z;
   for (int ix = 0; ix < gridsize.x; ix++) {
     for (int iy = 0; iy < gridsize.y; iy++) {
       for (int iz = 0; iz < gridsize.z; iz++) {
         int idx = iz * gridsize.x * gridsize.y + iy * gridsize.x + ix;
-        positions[idx] = {ix * cellsize.x, iy * cellsize.y, iz * cellsize.z};
+        positions[idx] = shift + glm::vec3{ix * cellsize.x, iy * cellsize.y,
+                                           iz * cellsize.z};
       }
     }
   }

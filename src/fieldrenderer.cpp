@@ -1,18 +1,12 @@
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
-#include "arrow.hpp"
-#include "camera.hpp"
 #include "field.hpp"
 #include "fieldrenderer.hpp"
 #include "shaderprogram.hpp"
 #include "shaders.hpp"
 
 FieldRenderer::FieldRenderer(Field* field)
-    : cuboid(glm::vec3{1.0, 1.0, 1.0}),
-      arrow(0.12, 0.2, 0.6, 40),
-      nRenderings_(0),
-      needRender(true) {
+    : cuboid(glm::vec3{1.0, 1.0, 1.0}), arrow(0.12, 0.2, 0.6, 40) {
   glGenBuffers(1, &vectorsVBO_);
   glGenBuffers(1, &positionVBO_);
 
@@ -26,8 +20,6 @@ FieldRenderer::FieldRenderer(Field* field)
   setMumaxColorScheme();
 
   setField(field);
-
-  resetCamera();
 }
 
 FieldRenderer::~FieldRenderer() {
@@ -38,12 +30,11 @@ FieldRenderer::~FieldRenderer() {
 
 void FieldRenderer::setField(Field* field) {
   field_ = field;
-  resetCamera();
   updateFieldVBOs();
   updateFieldAttribPointers();
   cuboid.setSize(field->cellsize);
   cuboid.updateVBOdata();
-  needRender = true;
+  ensureRendering();
 }
 
 void FieldRenderer::setGradientColorScheme(glm::mat3 gradient) {
@@ -51,25 +42,25 @@ void FieldRenderer::setGradientColorScheme(glm::mat3 gradient) {
   shader.setMat3("colorGradient", gradient);
   colorGradient_ = gradient;
   colorSchemeType_ = COLORSCHEME_GRADIENT;
-  needRender = true;
+  ensureRendering();
 };
 
 void FieldRenderer::setMumaxColorScheme() {
   shader.setBool("useColorGradient", false);
   colorSchemeType_ = COLORSCHEME_MUMAX;
-  needRender = true;
+  ensureRendering();
 };
 
 void FieldRenderer::setArrowScalingsFactor(float scalingsFactor) {
   arrowScalingsFactor_ = scalingsFactor;
   shader.setFloat("arrowScalingsFactor", scalingsFactor);
-  needRender = true;
+  ensureRendering();
 }
 
 void FieldRenderer::setCuboidScalingsFactor(float scalingsFactor) {
   cuboidScalingsFactor_ = scalingsFactor;
   shader.setFloat("cuboidScalingsFactor", scalingsFactor);
-  needRender = true;
+  ensureRendering();
 }
 
 void FieldRenderer::setGlyphType(GlyphType type) {
@@ -82,7 +73,7 @@ void FieldRenderer::setGlyphType(GlyphType type) {
   }
   glyphType_ = type;
   updateGlyphAttribPointers();
-  needRender = true;
+  ensureRendering();
 };
 
 ColorSchemeType FieldRenderer::colorSchemeType() const {
@@ -100,6 +91,12 @@ void FieldRenderer::updateFieldVBOs() {
   glBindBuffer(GL_ARRAY_BUFFER, positionVBO_);
   glBufferData(GL_ARRAY_BUFFER, bufferSize, &field_->positions[0],
                GL_STATIC_DRAW);
+}
+
+void FieldRenderer::ensureRendering() {
+  if (scene()) {
+    scene()->ensureRendering();
+  }
 }
 
 glm::mat3 FieldRenderer::colorGradient() const {
@@ -147,7 +144,7 @@ void FieldRenderer::updateGlyphAttribPointers() {
   glBindBuffer(GL_ARRAY_BUFFER, glyph->VBO());
   glVertexAttribPointer(aGlyphNormalLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void*)(sizeof(glm::vec3)));
-  needRender = true;
+  ensureRendering();
 }
 
 void FieldRenderer::updateFieldAttribPointers() {
@@ -163,32 +160,13 @@ void FieldRenderer::updateFieldAttribPointers() {
   glBindBuffer(GL_ARRAY_BUFFER, vectorsVBO_);
   glVertexAttribPointer(aInstanceVecLoc_, 3, GL_FLOAT, GL_FALSE,
                         sizeof(glm::vec3), (void*)0);
-  needRender = true;
+  ensureRendering();
 };
 
 void FieldRenderer::render() {
-  shader.setMat4("projection", camera.projectionMatrix());
-  shader.setMat4("view", camera.viewMatrix());
-  shader.setVec3("viewPos", camera.position());
+  shader.setMat4("projection", scene()->camera()->projectionMatrix());
+  shader.setMat4("view", scene()->camera()->viewMatrix());
+  shader.setVec3("viewPos", scene()->camera()->position());
   shader.use();
-  glDrawArraysInstanced(GL_TRIANGLES, 0, glyph->nVertices(),
-                        field_->ncells());  // needRender = false;
-  needRender = false;
-  nRenderings_++;
-}
-
-void FieldRenderer::resetCamera() {
-  needRender = true;
-  camera.yaw = 0.0;
-  camera.pitch = 3.1415 / 10.;
-  if (field_) {
-    camera.target =
-        glm::vec3(field_->cellsize.x * (field_->gridsize().x - 1) / 2.0,
-                  field_->cellsize.y * (field_->gridsize().y - 1) / 2.0,
-                  field_->cellsize.z * (field_->gridsize().z - 1) / 2.0);
-  }
-};
-
-int FieldRenderer::nRenderings() const {
-  return nRenderings_;
+  glDrawArraysInstanced(GL_TRIANGLES, 0, glyph->nVertices(), field_->ncells());
 }

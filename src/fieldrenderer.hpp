@@ -6,12 +6,14 @@
 #include "camera.hpp"
 #include "cuboid.hpp"
 #include "field.hpp"
+#include "glyph.hpp"
+#include "scene.hpp"
 #include "shaderprogram.hpp"
 
 enum ColorSchemeType { COLORSCHEME_MUMAX, COLORSCHEME_GRADIENT };
 enum GlyphType { ARROW, CUBOID };
 
-class FieldRenderer {
+class FieldRenderer : public SceneObject {
  public:
   FieldRenderer(Field* field);
   ~FieldRenderer();
@@ -26,13 +28,12 @@ class FieldRenderer {
   void initVertexArray();
   void updateGlyphAttribPointers();
   void updateFieldAttribPointers();
-  void resetCamera();
   void updateFieldVBOs();
 
+  void ensureRendering();
   void render();
 
   glm::mat3 colorGradient() const;
-  int nRenderings() const;
   ColorSchemeType colorSchemeType() const;
   GlyphType glyphType() const;
 
@@ -40,8 +41,6 @@ class FieldRenderer {
   Arrow arrow;
   Cuboid cuboid;
   ShaderProgram shader;
-  Camera camera;
-  bool needRender;
 
  private:
   Glyph* glyph;  // points either to arrow or to cuboid
@@ -51,7 +50,6 @@ class FieldRenderer {
   ColorSchemeType colorSchemeType_;
   GlyphType glyphType_;
   glm::mat3 colorGradient_;
-  int nRenderings_;
   float arrowScalingsFactor_;
   float cuboidScalingsFactor_;
 };
