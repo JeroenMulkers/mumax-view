@@ -5,7 +5,7 @@
 #include "shaderprogram.hpp"
 #include "shaders.hpp"
 
-FieldRenderer::FieldRenderer(Field* field)
+FieldRenderer::FieldRenderer()
     : cuboid(glm::vec3{1.0, 1.0, 1.0}), arrow(0.12, 0.2, 0.6, 40) {
   glGenBuffers(1, &vectorsVBO_);
   glGenBuffers(1, &positionVBO_);
@@ -18,7 +18,7 @@ FieldRenderer::FieldRenderer(Field* field)
   setArrowScalingsFactor(1.0);
   setMumaxColorScheme();
 
-  setField(field);
+  field_ = nullptr;
 }
 
 FieldRenderer::~FieldRenderer() {
@@ -84,6 +84,8 @@ GlyphType FieldRenderer::glyphType() const {
 };
 
 void FieldRenderer::updateFieldVBOs() {
+  if (!field_)
+    return;
   int bufferSize = sizeof(glm::vec3) * field_->ncells();
   glBindBuffer(GL_ARRAY_BUFFER, vectorsVBO_);
   glBufferData(GL_ARRAY_BUFFER, bufferSize, &field_->data[0], GL_STATIC_DRAW);
@@ -163,6 +165,8 @@ void FieldRenderer::updateFieldAttribPointers() {
 };
 
 void FieldRenderer::render() {
+  if (!field_)
+    return;
   shader.setMat4("projection", scene()->camera()->projectionMatrix());
   shader.setMat4("view", scene()->camera()->viewMatrix());
   shader.setVec3("viewPos", scene()->camera()->position());

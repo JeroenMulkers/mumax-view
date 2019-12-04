@@ -15,7 +15,7 @@ enum GlyphType { ARROW, CUBOID };
 
 class FieldRenderer : public SceneObject {
  public:
-  FieldRenderer(Field* field);
+  FieldRenderer();
   ~FieldRenderer();
 
   void setField(Field* field);
@@ -37,12 +37,12 @@ class FieldRenderer : public SceneObject {
   ColorSchemeType colorSchemeType() const;
   GlyphType glyphType() const;
 
-  Field* field_;
   Arrow arrow;
   Cuboid cuboid;
   ShaderProgram shader;
 
  private:
+  Field* field_;
   Glyph* glyph;  // points either to arrow or to cuboid
   unsigned int positionVBO_;
   unsigned int vectorsVBO_;

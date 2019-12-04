@@ -110,7 +110,7 @@
 
         <div id="magnetization" class="tabcontent">
             Load an OVF1_TEXT file
-            <input type="file" id="loadovf" />
+            <input type="file" id="loadovf" multiple />
         </div>
 
 
@@ -311,18 +311,31 @@
 
         var loadFile = Module.cwrap("loadfile", null, ["string"]);
         function handleFileSelect(evt) {
+            // TODO: find a non recursive way to load multiple files
+
+            var index = 0;
             var files = evt.target.files;
-            var file = files[0];
-            var reader = new FileReader();
-            reader.onload = function () {
-                var buffer = new Uint8Array(reader.result);
-                FS.createDataFile('/', "config", buffer, true, true, true);
-                buffer = [];
-                loadFile("/config");
-                FS.unlink("/config");
+
+            function loadFilesRecursively() {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    if (index >= files.length) {
+                        return;
+                    }
+                    var buffer = new Uint8Array(reader.result);
+                    FS.createDataFile('/', "config", buffer, true, true, true);
+                    buffer = [];
+                    loadFile("/config");
+                    FS.unlink("/config");
+                    index++;
+                    loadFilesRecursively();
+                }
+                reader.readAsArrayBuffer(files[index]);
             }
-            reader.readAsArrayBuffer(file);
+
+            loadFilesRecursively();
         }
+
 
         Module.onRuntimeInitialized = function () {
             document.getElementById('loadovf').addEventListener('change', handleFileSelect, false);

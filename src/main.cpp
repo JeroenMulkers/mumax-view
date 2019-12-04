@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "fieldcollection.hpp"
 #include "fieldrenderer.hpp"
 #include "ovf.hpp"
 #include "scene.hpp"
@@ -32,13 +33,12 @@ class Mouse {
   double lastY;
   double scrollSensitivity;
 };
+
 Mouse mouse;
 GLFWwindow* window;
-
 Scene scene;
-
-Field* field;
 FieldRenderer* renderer;
+FieldCollection fieldCollection;
 
 extern "C" {
 #ifdef __EMSCRIPTEN__
@@ -79,17 +79,8 @@ void updateCuboidScalingsFactor(float s) {
 }
 EMSCRIPTEN_KEEPALIVE
 void loadfile(std::string filename) {
-  Field* field;
-  try {
-    field = readFieldFromOVF(filename);
-  } catch (const std::fstream::failure& e) {
-    delete field;
-    std::cerr << e.what() << std::endl;
-    return;
-  }
-  Field* oldfield = renderer->field_;
-  renderer->setField(field);
-  delete oldfield;
+  fieldCollection.load(filename);
+  renderer->setField(fieldCollection.selectedField());
 }
 EM_JS(int, canvas_get_width, (), {
   return document.getElementById('canvas').scrollWidth;
@@ -195,25 +186,28 @@ int main(int argc, char** argv) {
 
   // -------- CREATE RENDERER ----------------------------------------------
 
+  renderer = new FieldRenderer();
+  renderer->putOnScene(&scene);
+
 #ifdef __EMSCRIPTEN__
-  field = testField(glm::ivec3(50, 50, 1));
+  fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
+  renderer->setField(fieldCollection.selectedField());
 #else
   if (argc > 1) {
     // std::string filename(argv[1]);
     try {
-      field = readFieldFromOVF(argv[1]);
+      fieldCollection.add(readFieldFromOVF(argv[1]));
+      renderer->setField(fieldCollection.selectedField());
     } catch (const std::fstream::failure& e) {
       std::cerr << e.what() << std::endl;
       return -1;
     }
 
   } else {
-    field = testField(glm::ivec3(50, 50, 1));
+    fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
+    renderer->setField(fieldCollection.selectedField());
   }
 #endif
-
-  renderer = new FieldRenderer(field);
-  renderer->putOnScene(&scene);
 
   //--------- MAIN LOOP ----------------------------------------------------
 
@@ -276,6 +270,14 @@ void keyCallBack(GLFWwindow* window,
       scene.camera()->setPitch(-glm::pi<float>() / 2);
     }
     scene.camera()->setYaw(0);
+
+  } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+    fieldCollection.selectNext();
+    renderer->setField(fieldCollection.selectedField());
+
+  } else if (key == GLFW_KEY_J && action == GLFW_PRESS) {
+    fieldCollection.selectPrevious();
+    renderer->setField(fieldCollection.selectedField());
   }
 }
 
