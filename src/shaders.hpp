@@ -124,10 +124,14 @@ void main() {
         scale[2][2] = L;
         model = translation * rotation * scale;
     } else {
-        mat4 scale = mat4(1.0);
-        scale[0][0] = cuboidScalingsFactor;
-        scale[1][1] = cuboidScalingsFactor;
-        scale[2][2] = cuboidScalingsFactor;
+        mat4 scale = mat4(0.0);
+        float eps = 1e-35;
+        if( length(aInstanceVector) > eps ) {
+            scale[0][0] = cuboidScalingsFactor;
+            scale[1][1] = cuboidScalingsFactor;
+            scale[2][2] = cuboidScalingsFactor;
+            scale[3][3] = 1.0;
+        }
         model = translation * scale; 
     }
 
