@@ -1,4 +1,3 @@
-#include <cmath>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -18,52 +17,11 @@
 #include "fieldrenderer.hpp"
 #include "ovf.hpp"
 #include "scene.hpp"
+#include "timeintervaltrigger.hpp"
 
 std::function<void()> loop;
 void main_loop() {
   loop();
-};
-
-class TimeIntervalTrigger {
- public:
-  TimeIntervalTrigger(double timeInterval)
-      : action_([] {}), active_(false), timeInterval_(timeInterval) {}
-
-  void setAction(std::function<void()> action) { action_ = action; }
-
-  void setTimeInterval(double timeInterval) { timeInterval_ = timeInterval; }
-
-  void start() {
-    active_ = true;
-    previousTime_ = glfwGetTime();
-  }
-
-  void stop() { active_ = false; }
-
-  void operator()() {
-    if (!active_)
-      return;
-
-    double time = glfwGetTime();
-    double delta = time - previousTime_;
-
-    // number of time intervals since previous action
-    int nIntervals = static_cast<int>(floor(delta / timeInterval_));
-
-    for (int i = 0; i < nIntervals; i++)
-      action_();
-
-    if (nIntervals > 0)
-      previousTime_ = time;
-  }
-
-  bool isActive() const { return active_; }
-
- private:
-  double previousTime_;
-  double timeInterval_;
-  bool active_;
-  std::function<void()> action_;
 };
 
 // TODO: put mouse and window in a descent window class
