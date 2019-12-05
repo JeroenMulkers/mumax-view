@@ -111,6 +111,19 @@
         <div id="magnetization" class="tabcontent">
             Load an OVF1_TEXT file
             <input type="file" id="loadovf" multiple />
+
+            <br>
+
+            <input type="range" id="fieldSelector" min="0" max="1" step=1 value=0
+                oninput="Module._fieldCollectionSelect(this.value);">
+
+            <input type="button" id="playButton" value="Play">
+
+            <br>
+
+            <input type="range" id="fpsSlider" min="1" max="200" step=1 value=10
+                oninput="Module._setTimeInterval(1./this.value);">
+            FPS: <span id="fps">10</span>
         </div>
 
 
@@ -311,6 +324,8 @@
 
         var loadFile = Module.cwrap("loadfile", null, ["string"]);
         function handleFileSelect(evt) {
+            stop();
+            Module._emptyFieldCollection();
             // TODO: find a non recursive way to load multiple files
 
             var index = 0;
@@ -329,6 +344,7 @@
                     FS.unlink("/config");
                     index++;
                     loadFilesRecursively();
+                    updateFieldSelector();
                 }
                 reader.readAsArrayBuffer(files[index]);
             }
@@ -336,6 +352,33 @@
             loadFilesRecursively();
         }
 
+        function updateFieldSelector() {
+            document.getElementById("fieldSelector").max = Module._fieldCollectionSize() - 1;
+            document.getElementById("fieldSelector").value = Module._fieldCollectionSelected();
+        }
+
+        function play() {
+            var playButton = document.getElementById('playButton');
+            var fps = document.getElementById('fpsSlider').value;
+            Module._setTimeInterval(1.0 / fps);
+            Module._startTimeIntervalTrigger();
+            playButton.value = 'Stop';
+        }
+
+        function stop() {
+            var playButton = document.getElementById('playButton');
+            Module._stopTimeIntervalTrigger();
+            playButton.value = 'Play';
+        }
+
+        function clickPlayButton() {
+            var playButton = document.getElementById('playButton');
+            if (playButton.value === 'Play') {
+                play();
+            } else {
+                stop();
+            }
+        }
 
         Module.onRuntimeInitialized = function () {
             document.getElementById('loadovf').addEventListener('change', handleFileSelect, false);
@@ -352,6 +395,13 @@
             } else {
                 Module._setScrollSensitivity(-0.1);
             }
+
+            document.getElementById('playButton').addEventListener('click', clickPlayButton, false);
+
+            document.getElementById('fpsSlider').addEventListener('input', function () {
+                document.getElementById("fps").innerHTML = this.value;
+            }, false);
+
         }
     </script>
 

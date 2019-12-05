@@ -1,3 +1,4 @@
+#include <cmath>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -23,6 +24,48 @@ void main_loop() {
   loop();
 };
 
+class TimeIntervalTrigger {
+ public:
+  TimeIntervalTrigger(double timeInterval)
+      : action_([] {}), active_(false), timeInterval_(timeInterval) {}
+
+  void setAction(std::function<void()> action) { action_ = action; }
+
+  void setTimeInterval(double timeInterval) { timeInterval_ = timeInterval; }
+
+  void start() {
+    active_ = true;
+    previousTime_ = glfwGetTime();
+  }
+
+  void stop() { active_ = false; }
+
+  void operator()() {
+    if (!active_)
+      return;
+
+    double time = glfwGetTime();
+    double delta = time - previousTime_;
+
+    // number of time intervals since previous action
+    int nIntervals = static_cast<int>(floor(delta / timeInterval_));
+
+    for (int i = 0; i < nIntervals; i++)
+      action_();
+
+    if (nIntervals > 0)
+      previousTime_ = time;
+  }
+
+  bool isActive() const { return active_; }
+
+ private:
+  double previousTime_;
+  double timeInterval_;
+  bool active_;
+  std::function<void()> action_;
+};
+
 // TODO: put mouse and window in a descent window class
 class Mouse {
  public:
@@ -39,6 +82,7 @@ GLFWwindow* window;
 Scene scene;
 FieldRenderer* renderer;
 FieldCollection fieldCollection;
+TimeIntervalTrigger timeIntervalTrigger(0.1);
 
 extern "C" {
 #ifdef __EMSCRIPTEN__
@@ -81,6 +125,35 @@ EMSCRIPTEN_KEEPALIVE
 void loadfile(std::string filename) {
   fieldCollection.load(filename);
   renderer->setField(fieldCollection.selectedField());
+}
+EMSCRIPTEN_KEEPALIVE
+void emptyFieldCollection() {
+  return fieldCollection.emptyCollection();
+}
+EMSCRIPTEN_KEEPALIVE
+int fieldCollectionSize() {
+  return fieldCollection.size();
+}
+EMSCRIPTEN_KEEPALIVE
+int fieldCollectionSelected() {
+  return fieldCollection.selectedFieldIdx();
+}
+EMSCRIPTEN_KEEPALIVE
+void fieldCollectionSelect(int idx) {
+  fieldCollection.select(idx);
+  renderer->setField(fieldCollection.selectedField());
+}
+EMSCRIPTEN_KEEPALIVE
+void setTimeInterval(double timeInterval) {
+  timeIntervalTrigger.setTimeInterval(timeInterval);
+}
+EMSCRIPTEN_KEEPALIVE
+void startTimeIntervalTrigger() {
+  timeIntervalTrigger.start();
+}
+EMSCRIPTEN_KEEPALIVE
+void stopTimeIntervalTrigger() {
+  timeIntervalTrigger.stop();
 }
 EM_JS(int, canvas_get_width, (), {
   return document.getElementById('canvas').scrollWidth;
@@ -211,14 +284,17 @@ int main(int argc, char** argv) {
 
   //--------- MAIN LOOP ----------------------------------------------------
 
+  timeIntervalTrigger.setAction([&]() {
+    fieldCollection.selectNext();
+    renderer->setField(fieldCollection.selectedField());
+  });
+
   loop = [&] {
-    if (scene.needRendering()) {
+    timeIntervalTrigger();
+
+    if (scene.needRendering())
       scene.render();
-    }
-    // if (renderer->needRender) {
-    //  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //  renderer->render();
-    //}
+
     glfwSwapBuffers(window);
     glfwPollEvents();  // alternative: glfwWaitEvents();
   };
