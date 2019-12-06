@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#include "field.hpp"
-#include "ovf.hpp"
+class Vimag;
+class Field;
 
 class FieldCollection {
  public:
-  FieldCollection();
+  FieldCollection(Vimag* vimag = nullptr);
   ~FieldCollection();
 
   void emptyCollection();
@@ -27,4 +27,5 @@ class FieldCollection {
   FieldCollection& operator=(const FieldCollection&);
   std::vector<Field*> fields;
   int selectedIdx_;
+  Vimag* vimag_;
 };

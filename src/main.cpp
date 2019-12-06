@@ -74,7 +74,6 @@ void updateCuboidScalingsFactor(float s) {
 EMSCRIPTEN_KEEPALIVE
 void loadfile(std::string filename) {
   vimag->fieldCollection.load(filename);
-  vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
 }
 EMSCRIPTEN_KEEPALIVE
 void emptyFieldCollection() {
@@ -91,7 +90,6 @@ int fieldCollectionSelected() {
 EMSCRIPTEN_KEEPALIVE
 void fieldCollectionSelect(int idx) {
   vimag->fieldCollection.select(idx);
-  vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
 }
 EMSCRIPTEN_KEEPALIVE
 void setTimeInterval(double timeInterval) {
@@ -211,13 +209,11 @@ int main(int argc, char** argv) {
 
 #ifdef __EMSCRIPTEN__
   vimag->fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
-  vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
 #else
   if (argc > 1) {
     // std::string filename(argv[1]);
     try {
       vimag->fieldCollection.add(readFieldFromOVF(argv[1]));
-      vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
     } catch (const std::fstream::failure& e) {
       std::cerr << e.what() << std::endl;
       return -1;
@@ -225,16 +221,13 @@ int main(int argc, char** argv) {
 
   } else {
     vimag->fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
-    vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
   }
 #endif
 
   //--------- MAIN LOOP ----------------------------------------------------
 
-  vimag->timeIntervalTrigger.setAction([&]() {
-    vimag->fieldCollection.selectNext();
-    vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
-  });
+  vimag->timeIntervalTrigger.setAction(
+      [&]() { vimag->fieldCollection.selectNext(); });
 
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(main_loop, 0, true);
@@ -285,11 +278,9 @@ void keyCallBack(GLFWwindow* window,
 
   } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
     vimag->fieldCollection.selectNext();
-    vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
 
   } else if (key == GLFW_KEY_J && action == GLFW_PRESS) {
     vimag->fieldCollection.selectPrevious();
-    vimag->fieldRenderer.setField(vimag->fieldCollection.selectedField());
   }
 }
 

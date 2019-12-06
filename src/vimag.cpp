@@ -1,8 +1,10 @@
 #include <GLFW/glfw3.h>
 
+#include "fieldcollection.hpp"
 #include "vimag.hpp"
 
-Vimag::Vimag(GLFWwindow* window) : window_(window), timeIntervalTrigger(0.1) {
+Vimag::Vimag(GLFWwindow* window)
+    : window_(window), timeIntervalTrigger(0.1), fieldCollection(this) {
   fieldRenderer.putOnScene(&scene);
 }
 

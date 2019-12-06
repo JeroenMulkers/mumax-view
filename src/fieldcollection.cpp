@@ -2,8 +2,11 @@
 #include <iostream>
 
 #include "fieldcollection.hpp"
+#include "ovf.hpp"
+#include "vimag.hpp"
 
-FieldCollection::FieldCollection() : selectedIdx_(-1) {}
+FieldCollection::FieldCollection(Vimag* vimag)
+    : selectedIdx_(-1), vimag_(vimag) {}
 
 FieldCollection::~FieldCollection() {
   emptyCollection();
@@ -19,7 +22,7 @@ void FieldCollection::emptyCollection() {
 
 void FieldCollection::add(Field* field) {
   fields.push_back(field);
-  selectedIdx_ = fields.size() - 1;
+  select(fields.size() - 1);
 }
 
 void FieldCollection::load(std::string filename) {
@@ -34,8 +37,7 @@ void FieldCollection::load(std::string filename) {
   }
 
   if (succes) {
-    fields.push_back(field);
-    selectedIdx_ = fields.size() - 1;
+    add(field);
   } else {
     delete field;
   }
@@ -44,8 +46,6 @@ void FieldCollection::load(std::string filename) {
 Field* FieldCollection::selectedField() const {
   if (selectedIdx_ < 0 || selectedIdx_ >= fields.size())
     return nullptr;
-
-  std::cout << selectedIdx_ << std::endl;
   return fields[selectedIdx_];
 }
 
@@ -55,17 +55,22 @@ int FieldCollection::selectedFieldIdx() const {
 
 void FieldCollection::select(int Idx) {
   selectedIdx_ = Idx;
+  if (vimag_)
+    vimag_->fieldRenderer.setField(selectedField());
 }
 
 void FieldCollection::selectNext() {
-  selectedIdx_ = (selectedIdx_ + 1) % fields.size();
+  int newIdx = (selectedIdx_ + 1) % fields.size();
+  select(newIdx);
 }
 
 void FieldCollection::selectPrevious() {
+  int newIdx;
   if (selectedIdx_ == 0)
-    selectedIdx_ = fields.size() - 1;
+    newIdx = fields.size() - 1;
   else
-    selectedIdx_--;
+    newIdx = selectedIdx_ - 1;
+  select(newIdx);
 }
 
 int FieldCollection::size() const {
