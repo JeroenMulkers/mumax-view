@@ -25,6 +25,7 @@ class Scene {
   Scene();
   ~Scene();
   bool needRendering() const;
+  void setBackgroundColor(float r, float g, float b);
   void ensureRendering();
   void render();
   void resetCamera();

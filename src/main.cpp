@@ -123,8 +123,7 @@ void updateCanvasSize() {
 }
 EMSCRIPTEN_KEEPALIVE
 void setBackgroundColor(float r, float g, float b) {
-  glClearColor(r, g, b, 1.0f);
-  vimag->scene.ensureRendering();
+  vimag->scene.setBackgroundColor(r, g, b);
 }
 EMSCRIPTEN_KEEPALIVE
 void setAmbientLighting(float intensity) {
@@ -201,7 +200,6 @@ int main(int argc, char** argv) {
 
   // -------- GL SETTINGS --------------------------------------------------
 
-  glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 #ifndef __EMSCRIPTEN__
   glEnable(GL_MULTISAMPLE);  // Needed for anti-aliasing

@@ -34,6 +34,7 @@ void SceneObject::ensureRendering() {
 Scene::Scene() {
   camera_ = Camera(this);
   resetCamera();
+  setBackgroundColor(0.3, 0.3, 0.3);
 }
 
 Scene::~Scene() {
@@ -48,6 +49,11 @@ Scene* SceneObject::scene() {
 
 bool Scene::needRendering() const {
   return needRender_;
+}
+
+void Scene::setBackgroundColor(float r, float g, float b) {
+  glClearColor(r, g, b, 1.0f);
+  ensureRendering();
 }
 
 void Scene::ensureRendering() {
