@@ -13,15 +13,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "fieldcollection.hpp"
-#include "fieldrenderer.hpp"
 #include "ovf.hpp"
-#include "scene.hpp"
-#include "timeintervaltrigger.hpp"
+#include "vimag.hpp"
 
-std::function<void()> loop;
+GLFWwindow* window;
+Vimag* vimag;
 void main_loop() {
-  loop();
+  vimag->loop();
 };
 
 // TODO: put mouse and window in a descent window class
@@ -34,13 +32,7 @@ class Mouse {
   double lastY;
   double scrollSensitivity;
 };
-
 Mouse mouse;
-GLFWwindow* window;
-Scene scene;
-FieldRenderer* renderer;
-FieldCollection fieldCollection;
-TimeIntervalTrigger timeIntervalTrigger(0.1);
 
 extern "C" {
 #ifdef __EMSCRIPTEN__
@@ -50,68 +42,68 @@ void setScrollSensitivity(double sensitivity) {
 }
 EMSCRIPTEN_KEEPALIVE
 void useArrowGlyph() {
-  renderer->setGlyphType(ARROW);
+  vimag->renderer->setGlyphType(ARROW);
 }
 EMSCRIPTEN_KEEPALIVE
 void useCuboidGlyph() {
-  renderer->setGlyphType(CUBOID);
+  vimag->renderer->setGlyphType(CUBOID);
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowShaftRadius(float r) {
-  renderer->arrow.setShaftRadius(r);
-  renderer->ensureRendering();
+  vimag->renderer->arrow.setShaftRadius(r);
+  vimag->renderer->ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRadius(float r) {
-  renderer->arrow.setHeadRadius(r);
-  renderer->ensureRendering();
+  vimag->renderer->arrow.setHeadRadius(r);
+  vimag->renderer->ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRatio(float r) {
-  renderer->arrow.setHeadRatio(r);
-  renderer->ensureRendering();
+  vimag->renderer->arrow.setHeadRatio(r);
+  vimag->renderer->ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowScalingsFactor(float s) {
-  renderer->setArrowScalingsFactor(s);
+  vimag->renderer->setArrowScalingsFactor(s);
 }
 EMSCRIPTEN_KEEPALIVE
 void updateCuboidScalingsFactor(float s) {
-  renderer->setCuboidScalingsFactor(s);
+  vimag->renderer->setCuboidScalingsFactor(s);
 }
 EMSCRIPTEN_KEEPALIVE
 void loadfile(std::string filename) {
-  fieldCollection.load(filename);
-  renderer->setField(fieldCollection.selectedField());
+  vimag->fieldCollection.load(filename);
+  vimag->renderer->setField(vimag->fieldCollection.selectedField());
 }
 EMSCRIPTEN_KEEPALIVE
 void emptyFieldCollection() {
-  return fieldCollection.emptyCollection();
+  return vimag->fieldCollection.emptyCollection();
 }
 EMSCRIPTEN_KEEPALIVE
 int fieldCollectionSize() {
-  return fieldCollection.size();
+  return vimag->fieldCollection.size();
 }
 EMSCRIPTEN_KEEPALIVE
 int fieldCollectionSelected() {
-  return fieldCollection.selectedFieldIdx();
+  return vimag->fieldCollection.selectedFieldIdx();
 }
 EMSCRIPTEN_KEEPALIVE
 void fieldCollectionSelect(int idx) {
-  fieldCollection.select(idx);
-  renderer->setField(fieldCollection.selectedField());
+  vimag->fieldCollection.select(idx);
+  vimag->renderer->setField(vimag->fieldCollection.selectedField());
 }
 EMSCRIPTEN_KEEPALIVE
 void setTimeInterval(double timeInterval) {
-  timeIntervalTrigger.setTimeInterval(timeInterval);
+  vimag->timeIntervalTrigger.setTimeInterval(timeInterval);
 }
 EMSCRIPTEN_KEEPALIVE
 void startTimeIntervalTrigger() {
-  timeIntervalTrigger.start();
+  vimag->timeIntervalTrigger.start();
 }
 EMSCRIPTEN_KEEPALIVE
 void stopTimeIntervalTrigger() {
-  timeIntervalTrigger.stop();
+  vimag->timeIntervalTrigger.stop();
 }
 EM_JS(int, canvas_get_width, (), {
   return document.getElementById('canvas').scrollWidth;
@@ -132,12 +124,12 @@ void updateCanvasSize() {
 EMSCRIPTEN_KEEPALIVE
 void setBackgroundColor(float r, float g, float b) {
   glClearColor(r, g, b, 1.0f);
-  scene.ensureRendering();
+  vimag->scene.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void setAmbientLighting(float intensity) {
-  renderer->shader.setFloat("ambientLight", intensity);
-  scene.ensureRendering();
+  vimag->renderer->shader.setFloat("ambientLight", intensity);
+  vimag->scene.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void setGradientColorScheme(float r1,
@@ -149,12 +141,12 @@ void setGradientColorScheme(float r1,
                             float r3,
                             float g3,
                             float b3) {
-  renderer->setGradientColorScheme(
+  vimag->renderer->setGradientColorScheme(
       glm::mat3(r1, g1, b1, r2, g2, b2, r3, g3, b3));
 }
 EMSCRIPTEN_KEEPALIVE
 void setMumaxColorScheme() {
-  renderer->setMumaxColorScheme();
+  vimag->renderer->setMumaxColorScheme();
 }
 #endif
 }
@@ -215,64 +207,52 @@ int main(int argc, char** argv) {
   glEnable(GL_MULTISAMPLE);  // Needed for anti-aliasing
 #endif
 
-  // -------- CREATE RENDERER ----------------------------------------------
+  vimag = new Vimag(window);
 
-  renderer = new FieldRenderer();
-  renderer->putOnScene(&scene);
+  // -------- LOAD INITIAL FIELD --------------------------------------------
 
 #ifdef __EMSCRIPTEN__
-  fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
-  renderer->setField(fieldCollection.selectedField());
+  vimag->fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
+  vimag->renderer->setField(vimag->fieldCollection.selectedField());
 #else
   if (argc > 1) {
     // std::string filename(argv[1]);
     try {
-      fieldCollection.add(readFieldFromOVF(argv[1]));
-      renderer->setField(fieldCollection.selectedField());
+      vimag->fieldCollection.add(readFieldFromOVF(argv[1]));
+      vimag->renderer->setField(vimag->fieldCollection.selectedField());
     } catch (const std::fstream::failure& e) {
       std::cerr << e.what() << std::endl;
       return -1;
     }
 
   } else {
-    fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
-    renderer->setField(fieldCollection.selectedField());
+    vimag->fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
+    vimag->renderer->setField(vimag->fieldCollection.selectedField());
   }
 #endif
 
   //--------- MAIN LOOP ----------------------------------------------------
 
-  timeIntervalTrigger.setAction([&]() {
-    fieldCollection.selectNext();
-    renderer->setField(fieldCollection.selectedField());
+  vimag->timeIntervalTrigger.setAction([&]() {
+    vimag->fieldCollection.selectNext();
+    vimag->renderer->setField(vimag->fieldCollection.selectedField());
   });
-
-  loop = [&] {
-    timeIntervalTrigger();
-
-    if (scene.needRendering())
-      scene.render();
-
-    glfwSwapBuffers(window);
-    glfwPollEvents();  // alternative: glfwWaitEvents();
-  };
 
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(main_loop, 0, true);
 #else
   while (!glfwWindowShouldClose(window))
-    loop();
+    vimag->loop();
 #endif
 
   //-------- CLEAN UP --------------------------------------------------------
 
-  delete renderer;
   glfwTerminate();
   return 0;
 }
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
-  scene.ensureRendering();
+  vimag->scene.ensureRendering();
   glViewport(0, 0, width, height);
 }
 
@@ -283,42 +263,42 @@ void keyCallBack(GLFWwindow* window,
                  int mods) {
   if (key == GLFW_KEY_X && action == GLFW_PRESS) {
     if (mods == 0) {
-      scene.camera()->setYaw(glm::pi<float>() / 2);
+      vimag->scene.camera()->setYaw(glm::pi<float>() / 2);
     } else if (mods == 1) {
-      scene.camera()->setYaw(-glm::pi<float>() / 2);
+      vimag->scene.camera()->setYaw(-glm::pi<float>() / 2);
     }
-    scene.camera()->setPitch(0);
+    vimag->scene.camera()->setPitch(0);
 
   } else if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
     if (mods == 0) {
-      scene.camera()->setYaw(0);
+      vimag->scene.camera()->setYaw(0);
     } else if (mods == 1) {
-      scene.camera()->setYaw(glm::pi<float>());
+      vimag->scene.camera()->setYaw(glm::pi<float>());
     }
-    scene.camera()->setPitch(0);
+    vimag->scene.camera()->setPitch(0);
 
   } else if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
     if (mods == 0) {
-      scene.camera()->setPitch(glm::pi<float>() / 2);
+      vimag->scene.camera()->setPitch(glm::pi<float>() / 2);
     } else if (mods == 1) {
-      scene.camera()->setPitch(-glm::pi<float>() / 2);
+      vimag->scene.camera()->setPitch(-glm::pi<float>() / 2);
     }
-    scene.camera()->setYaw(0);
+    vimag->scene.camera()->setYaw(0);
 
   } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
-    fieldCollection.selectNext();
-    renderer->setField(fieldCollection.selectedField());
+    vimag->fieldCollection.selectNext();
+    vimag->renderer->setField(vimag->fieldCollection.selectedField());
 
   } else if (key == GLFW_KEY_J && action == GLFW_PRESS) {
-    fieldCollection.selectPrevious();
-    renderer->setField(fieldCollection.selectedField());
+    vimag->fieldCollection.selectPrevious();
+    vimag->renderer->setField(vimag->fieldCollection.selectedField());
   }
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-  scene.ensureRendering();
-  float dist = scene.camera()->distance();
-  scene.camera()->setDistance(
+  vimag->scene.ensureRendering();
+  float dist = vimag->scene.camera()->distance();
+  vimag->scene.camera()->setDistance(
       dist * (1.0 - static_cast<float>(mouse.scrollSensitivity * yoffset)));
 }
 
@@ -349,11 +329,11 @@ void curserPosCallback(GLFWwindow* window, double xpos, double ypos) {
   if (mouse.leftButtonDown) {
     float sensitivity = 0.02;
 
-    float newYaw = scene.camera()->yaw() + sensitivity * xoffset;
-    float newPitch = scene.camera()->pitch() - sensitivity * yoffset;
+    float newYaw = vimag->scene.camera()->yaw() + sensitivity * xoffset;
+    float newPitch = vimag->scene.camera()->pitch() - sensitivity * yoffset;
 
-    scene.camera()->setYaw(newYaw);
-    scene.camera()->setPitch(newPitch);
+    vimag->scene.camera()->setYaw(newYaw);
+    vimag->scene.camera()->setPitch(newPitch);
   }
   // TODO: fix middle button feature
   // if (mouse.middleButtonDown) {
