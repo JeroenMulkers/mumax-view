@@ -123,7 +123,6 @@ void setBackgroundColor(float r, float g, float b) {
 EMSCRIPTEN_KEEPALIVE
 void setAmbientLighting(float intensity) {
   vimag->fieldRenderer.shader.setFloat("ambientLight", intensity);
-  vimag->scene.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void setGradientColorScheme(float r1,
@@ -282,7 +281,6 @@ void keyCallBack(GLFWwindow* window,
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-  vimag->scene.ensureRendering();
   float dist = vimag->scene.camera.distance();
   vimag->scene.camera.setDistance(
       dist * (1.0 - static_cast<float>(mouse.scrollSensitivity * yoffset)));

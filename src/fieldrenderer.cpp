@@ -6,7 +6,9 @@
 #include "shaders.hpp"
 
 FieldRenderer::FieldRenderer()
-    : cuboid(glm::vec3{1.0, 1.0, 1.0}), arrow(0.12, 0.2, 0.6, 40) {
+    : cuboid(glm::vec3{1.0, 1.0, 1.0}),
+      arrow(0.12, 0.2, 0.6, 40),
+      shader(this) {
   glGenBuffers(1, &vectorsVBO_);
   glGenBuffers(1, &positionVBO_);
 
@@ -44,25 +46,21 @@ void FieldRenderer::setGradientColorScheme(glm::mat3 gradient) {
   shader.setMat3("colorGradient", gradient);
   colorGradient_ = gradient;
   colorSchemeType_ = COLORSCHEME_GRADIENT;
-  ensureRendering();
 };
 
 void FieldRenderer::setMumaxColorScheme() {
   shader.setBool("useColorGradient", false);
   colorSchemeType_ = COLORSCHEME_MUMAX;
-  ensureRendering();
 };
 
 void FieldRenderer::setArrowScalingsFactor(float scalingsFactor) {
   arrowScalingsFactor_ = scalingsFactor;
   shader.setFloat("arrowScalingsFactor", scalingsFactor);
-  ensureRendering();
 }
 
 void FieldRenderer::setCuboidScalingsFactor(float scalingsFactor) {
   cuboidScalingsFactor_ = scalingsFactor;
   shader.setFloat("cuboidScalingsFactor", scalingsFactor);
-  ensureRendering();
 }
 
 void FieldRenderer::setGlyphType(GlyphType type) {
@@ -75,7 +73,6 @@ void FieldRenderer::setGlyphType(GlyphType type) {
   }
   glyphType_ = type;
   updateGlyphAttribPointers();
-  ensureRendering();
 };
 
 ColorSchemeType FieldRenderer::colorSchemeType() const {
