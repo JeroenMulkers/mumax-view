@@ -42,6 +42,8 @@ class FieldRenderer : public SceneObject {
   ShaderProgram shader;
 
  private:
+  FieldRenderer(const FieldRenderer&);
+  FieldRenderer& operator=(const FieldRenderer&);
   Field* field_;
   Glyph* glyph;  // points either to arrow or to cuboid
   unsigned int positionVBO_;

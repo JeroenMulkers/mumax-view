@@ -167,9 +167,9 @@ void FieldRenderer::updateFieldAttribPointers() {
 void FieldRenderer::render() {
   if (!field_)
     return;
-  shader.setMat4("projection", scene()->camera()->projectionMatrix());
-  shader.setMat4("view", scene()->camera()->viewMatrix());
-  shader.setVec3("viewPos", scene()->camera()->position());
+  shader.setMat4("projection", scene()->camera.projectionMatrix());
+  shader.setMat4("view", scene()->camera.viewMatrix());
+  shader.setVec3("viewPos", scene()->camera.position());
   shader.use();
   glDrawArraysInstanced(GL_TRIANGLES, 0, glyph->nVertices(), field_->ncells());
 }

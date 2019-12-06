@@ -7,6 +7,27 @@
 
 Camera::Camera(Scene* scene) : scene_(scene) {
   targetDistance_ = 40.0f;
+  yaw_ = (0.0);
+  pitch_ = (3.1415 / 10.);
+  target_ = glm::vec3(0, 0, 0);
+  ensureRendering();
+}
+
+Camera::Camera(const Camera& camera) : scene_(nullptr) {
+  targetDistance_ = camera.targetDistance_;
+  yaw_ = camera.yaw_;
+  pitch_ = camera.pitch_;
+  target_ = camera.target_;
+  ensureRendering();
+}
+
+Camera& Camera::operator=(const Camera& camera) {
+  targetDistance_ = camera.targetDistance_;
+  yaw_ = camera.yaw_;
+  pitch_ = camera.pitch_;
+  target_ = camera.target_;
+  ensureRendering();
+  return *this;
 }
 
 void Camera::setTarget(glm::vec3 target) {

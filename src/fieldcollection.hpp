@@ -23,6 +23,8 @@ class FieldCollection {
   int size() const;
 
  private:
+  FieldCollection(const FieldCollection&);
+  FieldCollection& operator=(const FieldCollection&);
   std::vector<Field*> fields;
   int selectedIdx_;
 };

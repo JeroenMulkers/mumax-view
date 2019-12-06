@@ -31,8 +31,7 @@ void SceneObject::ensureRendering() {
     scene_->ensureRendering();
 }
 
-Scene::Scene() {
-  camera_ = Camera(this);
+Scene::Scene() : camera(this) {
   resetCamera();
   setBackgroundColor(0.3, 0.3, 0.3);
 }
@@ -69,11 +68,7 @@ void Scene::render() {
 }
 
 void Scene::resetCamera() {
-  camera_.setYaw(0.0);
-  camera_.setPitch(3.1415 / 10.);
-  camera_.setTarget(glm::vec3(0, 0, 0));
-}
-
-Camera* Scene::camera() {
-  return &camera_;
+  camera.setYaw(0.0);
+  camera.setPitch(3.1415 / 10.);
+  camera.setTarget(glm::vec3(0, 0, 0));
 }

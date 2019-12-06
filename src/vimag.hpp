@@ -10,11 +10,8 @@
 class Vimag {
  public:
   Vimag(GLFWwindow* window) : window_(window), timeIntervalTrigger(0.1) {
-    renderer = new FieldRenderer();
-    renderer->putOnScene(&scene);
+    fieldRenderer.putOnScene(&scene);
   }
-
-  ~Vimag() { delete renderer; }
 
   void loop() {
     timeIntervalTrigger();
@@ -24,10 +21,10 @@ class Vimag {
     glfwPollEvents();  // alternative: glfwWaitEvents();
   }
 
-  Scene scene;
-  FieldRenderer* renderer;
   FieldCollection fieldCollection;
+  Scene scene;
   TimeIntervalTrigger timeIntervalTrigger;
+  FieldRenderer fieldRenderer;
 
  private:
   GLFWwindow* window_;

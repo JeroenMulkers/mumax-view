@@ -17,6 +17,8 @@ class SceneObject {
   virtual void render() = 0;
 
  private:
+  SceneObject(const SceneObject&);
+  SceneObject& operator=(const SceneObject&);
   Scene* scene_;
 };
 
@@ -29,10 +31,11 @@ class Scene {
   void ensureRendering();
   void render();
   void resetCamera();
-  Camera* camera();
+  Camera camera;
 
  private:
-  Camera camera_;
+  Scene(const Scene&);
+  Scene& operator=(const Scene&);
   std::set<SceneObject*> objects_;
   friend void SceneObject::putOnScene(Scene* scene);
   friend void SceneObject::removeFromScene();
