@@ -222,9 +222,6 @@ int main(int argc, char** argv) {
 
   //--------- MAIN LOOP ----------------------------------------------------
 
-  vimag->timeIntervalTrigger.setAction(
-      [&]() { vimag->fieldCollection.selectNext(); });
-
 #ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(main_loop, 0, true);
 #else

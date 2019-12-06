@@ -6,6 +6,7 @@
 Vimag::Vimag(GLFWwindow* window)
     : window_(window), timeIntervalTrigger(0.1), fieldCollection(this) {
   fieldRenderer.putOnScene(&scene);
+  timeIntervalTrigger.setAction([&]() { fieldCollection.selectNext(); });
 }
 
 void Vimag::loop() {
