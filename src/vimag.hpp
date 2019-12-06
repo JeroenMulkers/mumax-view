@@ -9,17 +9,9 @@
 
 class Vimag {
  public:
-  Vimag(GLFWwindow* window) : window_(window), timeIntervalTrigger(0.1) {
-    fieldRenderer.putOnScene(&scene);
-  }
+  Vimag(GLFWwindow* window);
 
-  void loop() {
-    timeIntervalTrigger();
-    if (scene.needRendering())
-      scene.render();
-    glfwSwapBuffers(window_);
-    glfwPollEvents();  // alternative: glfwWaitEvents();
-  }
+  void loop();
 
   FieldCollection fieldCollection;
   Scene scene;
@@ -27,5 +19,7 @@ class Vimag {
   FieldRenderer fieldRenderer;
 
  private:
+  Vimag(const Vimag&);
+  Vimag& operator=(const Vimag&);
   GLFWwindow* window_;
 };
