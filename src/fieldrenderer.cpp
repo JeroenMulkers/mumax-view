@@ -2,7 +2,6 @@
 
 #include "field.hpp"
 #include "fieldrenderer.hpp"
-#include "shaderprogram.hpp"
 #include "shaders.hpp"
 
 FieldRenderer::FieldRenderer()

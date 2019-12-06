@@ -3,15 +3,15 @@
 #include <glm/glm.hpp>
 
 #include "arrow.hpp"
-#include "camera.hpp"
 #include "cuboid.hpp"
-#include "field.hpp"
 #include "glyph.hpp"
 #include "scene.hpp"
 #include "shaderprogram.hpp"
 
 enum ColorSchemeType { COLORSCHEME_MUMAX, COLORSCHEME_GRADIENT };
 enum GlyphType { ARROW, CUBOID };
+
+class Field;
 
 class FieldRenderer : public SceneObject {
  public:
