@@ -18,6 +18,9 @@ FieldRenderer::FieldRenderer()
   setArrowScalingsFactor(1.0);
   setMumaxColorScheme();
 
+  arrow.setParent(this);
+  cuboid.setParent(this);
+
   field_ = nullptr;
 }
 

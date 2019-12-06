@@ -51,17 +51,14 @@ void useCuboidGlyph() {
 EMSCRIPTEN_KEEPALIVE
 void updateArrowShaftRadius(float r) {
   vimag->fieldRenderer.arrow.setShaftRadius(r);
-  vimag->fieldRenderer.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRadius(float r) {
   vimag->fieldRenderer.arrow.setHeadRadius(r);
-  vimag->fieldRenderer.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRatio(float r) {
   vimag->fieldRenderer.arrow.setHeadRatio(r);
-  vimag->fieldRenderer.ensureRendering();
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowScalingsFactor(float s) {

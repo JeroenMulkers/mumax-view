@@ -4,10 +4,13 @@
 #include <glm/glm.hpp>
 
 #include "glyph.hpp"
+#include "scene.hpp"
 
 Glyph::Glyph() : nVertices_(0) {
+  parent_ = nullptr;
   glGenBuffers(1, &VBO_);
 }
+
 Glyph::~Glyph() {
   glDeleteBuffers(1, &VBO_);
 }
@@ -23,6 +26,12 @@ void Glyph::updateVBOdata() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle) * nTriangles_, &triangles_[0],
                GL_STATIC_DRAW);
   nVertices_ = 3 * nTriangles_;
+  parent_->ensureRendering();
+}
+
+void Glyph::setParent(SceneObject* parent) {
+  parent_ = parent;
+  parent_->ensureRendering();
 }
 
 unsigned int Glyph::VBO() const {

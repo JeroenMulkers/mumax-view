@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+class SceneObject;
+
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
@@ -23,10 +25,17 @@ class Glyph {
   virtual int nTriangles() const = 0;
 
   int nVertices() const;
-  void updateVBOdata();
   unsigned int VBO() const;
+  void updateVBOdata();
+
+  /// Set the parent SceneObject of a glyph
+  /// When the glyph is change, parent->ensureRendering() is called
+  void setParent(SceneObject* parent);
 
  private:
+  Glyph(const Glyph&);
+  Glyph& operator=(const Glyph&);
   unsigned int VBO_;
   int nVertices_;
+  SceneObject* parent_;
 };
