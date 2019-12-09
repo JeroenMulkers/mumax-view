@@ -56,7 +56,7 @@ int FieldCollection::selectedFieldIdx() const {
 void FieldCollection::select(int Idx) {
   selectedIdx_ = Idx;
   if (vimag_)
-    vimag_->fieldRenderer.setField(selectedField());
+    vimag_->updateField();
 }
 
 void FieldCollection::selectNext() {

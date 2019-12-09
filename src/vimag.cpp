@@ -16,3 +16,7 @@ void Vimag::loop() {
   glfwSwapBuffers(window_);
   glfwPollEvents();  // alternative: glfwWaitEvents();
 }
+
+void Vimag::updateField() {
+  fieldRenderer.setField(fieldCollection.selectedField());
+}

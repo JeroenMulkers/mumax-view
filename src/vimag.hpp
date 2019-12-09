@@ -12,6 +12,7 @@ class Vimag {
   Vimag(GLFWwindow* window);
 
   void loop();
+  void updateField();
 
   FieldCollection fieldCollection;
   Scene scene;
