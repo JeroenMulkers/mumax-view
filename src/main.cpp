@@ -4,6 +4,7 @@
 
 // USE GLES API FOR RENDERING
 #ifdef __EMSCRIPTEN__
+#include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
 #else
 #include <GLES3/gl3.h>
@@ -33,6 +34,21 @@ class Mouse {
   double scrollSensitivity;
 };
 Mouse mouse;
+
+std::string getFieldName() {
+  return vimag->fieldCollection.selectedFieldName();
+}
+
+void loadConfigFile(std::string filename) {
+  vimag->fieldCollection.load(filename);
+}
+
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_BINDINGS(myModule) {
+  emscripten::function("getFieldName", &getFieldName);
+  emscripten::function("loadConfigFile", &loadConfigFile);
+}
+#endif
 
 extern "C" {
 #ifdef __EMSCRIPTEN__
@@ -67,10 +83,6 @@ void updateArrowScalingsFactor(float s) {
 EMSCRIPTEN_KEEPALIVE
 void updateCuboidScalingsFactor(float s) {
   vimag->fieldRenderer.setCuboidScalingsFactor(s);
-}
-EMSCRIPTEN_KEEPALIVE
-void loadfile(std::string filename) {
-  vimag->fieldCollection.load(filename);
 }
 EMSCRIPTEN_KEEPALIVE
 void emptyFieldCollection() {
@@ -204,19 +216,21 @@ int main(int argc, char** argv) {
   // -------- LOAD INITIAL FIELD --------------------------------------------
 
 #ifdef __EMSCRIPTEN__
-  vimag->fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
+  vimag->fieldCollection.add(
+      NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
 #else
   if (argc > 1) {
     // std::string filename(argv[1]);
     try {
-      vimag->fieldCollection.add(readFieldFromOVF(argv[1]));
+      vimag->fieldCollection.load(argv[1]);
     } catch (const std::fstream::failure& e) {
       std::cerr << e.what() << std::endl;
       return -1;
     }
 
   } else {
-    vimag->fieldCollection.add(testField(glm::ivec3(50, 50, 1)));
+    vimag->fieldCollection.add(
+        NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
   }
 #endif
 

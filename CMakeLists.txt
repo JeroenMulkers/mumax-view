@@ -9,6 +9,7 @@ add_definitions(-std=c++14)
 if (EMSCRIPTEN) 
 
     set_target_properties(vimag PROPERTIES LINK_FLAGS " \
+        --bind \
         -s WASM=1 \
         -s USE_GLFW=3 \
         -s USE_WEBGL2=1 \

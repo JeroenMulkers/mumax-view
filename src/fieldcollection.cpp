@@ -1,9 +1,13 @@
 #include <fstream>
-#include <iostream>
+#include <string>
+#include <vector>
 
 #include "fieldcollection.hpp"
 #include "ovf.hpp"
 #include "vimag.hpp"
+
+NamedField::NamedField(Field* field, std::string name)
+    : field(field), name(name) {}
 
 FieldCollection::FieldCollection(Vimag* vimag)
     : selectedIdx_(-1), vimag_(vimag) {}
@@ -13,14 +17,14 @@ FieldCollection::~FieldCollection() {
 }
 
 void FieldCollection::emptyCollection() {
-  for (Field* f : fields) {
-    delete f;
+  for (NamedField f : fields) {
+    delete f.field;
   }
   fields.clear();
   selectedIdx_ = -1;
 }
 
-void FieldCollection::add(Field* field) {
+void FieldCollection::add(NamedField field) {
   fields.push_back(field);
   select(fields.size() - 1);
 }
@@ -37,7 +41,7 @@ void FieldCollection::load(std::string filename) {
   }
 
   if (succes) {
-    add(field);
+    add(NamedField(field, filename));
   } else {
     delete field;
   }
@@ -46,7 +50,13 @@ void FieldCollection::load(std::string filename) {
 Field* FieldCollection::selectedField() const {
   if (selectedIdx_ < 0 || selectedIdx_ >= fields.size())
     return nullptr;
-  return fields[selectedIdx_];
+  return fields[selectedIdx_].field;
+}
+
+std::string FieldCollection::selectedFieldName() const {
+  if (selectedIdx_ < 0 || selectedIdx_ >= fields.size())
+    return nullptr;
+  return fields[selectedIdx_].name;
 }
 
 int FieldCollection::selectedFieldIdx() const {

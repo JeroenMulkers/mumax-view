@@ -1,5 +1,9 @@
 #include <GLFW/glfw3.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #include "fieldcollection.hpp"
 #include "vimag.hpp"
 
@@ -19,4 +23,9 @@ void Vimag::loop() {
 
 void Vimag::updateField() {
   fieldRenderer.setField(fieldCollection.selectedField());
+
+// update web gui
+#ifdef __EMSCRIPTEN__
+  EM_ASM({ updateFieldSelector(); });
+#endif
 }

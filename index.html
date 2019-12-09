@@ -109,21 +109,25 @@
         <!-- MAGNETIZATION TAB -->
 
         <div id="magnetization" class="tabcontent">
-            Load an OVF1_TEXT file
+            Load OVF1_TEXT files
             <input type="file" id="loadovf" multiple />
 
             <br>
+            <br>
 
             <input type="range" id="fieldSelector" min="0" max="1" step=1 value=0
-                oninput="Module._fieldCollectionSelect(this.value);">
-
-            <input type="button" id="playButton" value="Play">
+                oninput="Module._fieldCollectionSelect(this.value)">
+            <span id="fieldName"></span>
 
             <br>
 
             <input type="range" id="fpsSlider" min="1" max="200" step=1 value=10
                 oninput="Module._setTimeInterval(1./this.value);">
             FPS: <span id="fps">10</span>
+
+            <br>
+
+            <input type="button" id="playButton" value="Play">
         </div>
 
 
@@ -322,7 +326,6 @@
         updateColorInputBox(document.getElementById("gradientZeroColor"));
         updateColorInputBox(document.getElementById("gradientNegativeColor"));
 
-        var loadFile = Module.cwrap("loadfile", null, ["string"]);
         function handleFileSelect(evt) {
             stop();
             Module._emptyFieldCollection();
@@ -338,10 +341,11 @@
                         return;
                     }
                     var buffer = new Uint8Array(reader.result);
-                    FS.createDataFile('/', "config", buffer, true, true, true);
+                    var fname = files[index].name;
+                    FS.createDataFile('/', fname, buffer, true, true, true);
                     buffer = [];
-                    loadFile("/config");
-                    FS.unlink("/config");
+                    Module.loadConfigFile(fname);
+                    FS.unlink(fname);
                     index++;
                     loadFilesRecursively();
                     updateFieldSelector();
@@ -355,6 +359,7 @@
         function updateFieldSelector() {
             document.getElementById("fieldSelector").max = Module._fieldCollectionSize() - 1;
             document.getElementById("fieldSelector").value = Module._fieldCollectionSelected();
+            document.getElementById("fieldName").innerHTML = Module.getFieldName();
         }
 
         function play() {
