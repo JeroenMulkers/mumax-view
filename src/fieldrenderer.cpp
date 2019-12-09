@@ -164,5 +164,6 @@ void FieldRenderer::render() {
   shader.setMat4("view", scene()->camera.viewMatrix());
   shader.setVec3("viewPos", scene()->camera.position());
   shader.use();
+  glBindVertexArray(VAO_);
   glDrawArraysInstanced(GL_TRIANGLES, 0, glyph->nVertices(), field_->ncells());
 }
