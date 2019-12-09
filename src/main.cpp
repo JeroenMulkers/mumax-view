@@ -274,6 +274,13 @@ void keyCallBack(GLFWwindow* window,
 
   } else if (key == GLFW_KEY_J && action == GLFW_PRESS) {
     vimag->fieldCollection.selectPrevious();
+
+  } else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+    if (vimag->timeIntervalTrigger.isActive()) {
+      vimag->timeIntervalTrigger.stop();
+    } else {
+      vimag->timeIntervalTrigger.start();
+    }
   }
 }
 
