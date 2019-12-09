@@ -93,12 +93,6 @@ void FieldRenderer::updateFieldVBOs() {
                GL_STATIC_DRAW);
 }
 
-void FieldRenderer::ensureRendering() {
-  if (scene()) {
-    scene()->ensureRendering();
-  }
-}
-
 glm::mat3 FieldRenderer::colorGradient() const {
   return colorGradient_;
 }

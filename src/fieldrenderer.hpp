@@ -29,8 +29,6 @@ class FieldRenderer : public SceneObject {
   void updateGlyphAttribPointers();
   void updateFieldAttribPointers();
   void updateFieldVBOs();
-
-  void ensureRendering();
   void render();
 
   glm::mat3 colorGradient() const;
