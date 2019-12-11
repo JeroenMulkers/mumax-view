@@ -284,10 +284,16 @@ void keyCallBack(GLFWwindow* window,
     vimag->scene.camera.setYaw(0);
 
   } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
-    vimag->fieldCollection.selectNext();
+    vimag->timeIntervalTrigger.start();
+  } else if (key == GLFW_KEY_K && action == GLFW_RELEASE) {
+    vimag->timeIntervalTrigger.stop();
 
   } else if (key == GLFW_KEY_J && action == GLFW_PRESS) {
-    vimag->fieldCollection.selectPrevious();
+    vimag->setPlayDirection(PLAYBACKWARD);
+    vimag->timeIntervalTrigger.start();
+  } else if (key == GLFW_KEY_J && action == GLFW_RELEASE) {
+    vimag->timeIntervalTrigger.stop();
+    vimag->setPlayDirection(PLAYFORWARD);  // set back default play direction
 
   } else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
     if (vimag->timeIntervalTrigger.isActive()) {

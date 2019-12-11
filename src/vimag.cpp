@@ -10,7 +10,7 @@
 Vimag::Vimag(GLFWwindow* window)
     : window_(window), timeIntervalTrigger(0.1), fieldCollection(this) {
   fieldRenderer.putOnScene(&scene);
-  timeIntervalTrigger.setAction([&]() { fieldCollection.selectNext(); });
+  setPlayDirection(PLAYFORWARD);
 }
 
 void Vimag::loop() {
@@ -28,4 +28,12 @@ void Vimag::updateField() {
 #ifdef __EMSCRIPTEN__
   EM_ASM({ updateFieldSelector(); });
 #endif
+}
+
+void Vimag::setPlayDirection(PlayDirection playDirection) {
+  if (playDirection == PLAYFORWARD) {
+    timeIntervalTrigger.setAction([&]() { fieldCollection.selectNext(); });
+  } else {
+    timeIntervalTrigger.setAction([&]() { fieldCollection.selectPrevious(); });
+  }
 }

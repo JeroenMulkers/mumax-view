@@ -7,12 +7,15 @@
 #include "scene.hpp"
 #include "timeintervaltrigger.hpp"
 
+enum PlayDirection { PLAYFORWARD, PLAYBACKWARD };
+
 class Vimag {
  public:
   Vimag(GLFWwindow* window);
 
   void loop();
   void updateField();
+  void setPlayDirection(PlayDirection);
 
   FieldCollection fieldCollection;
   Scene scene;
