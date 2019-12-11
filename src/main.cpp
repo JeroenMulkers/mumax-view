@@ -133,6 +133,15 @@ void setBackgroundColor(float r, float g, float b) {
   vimag->scene.setBackgroundColor(r, g, b);
 }
 EMSCRIPTEN_KEEPALIVE
+void setOutlineVisibility(bool visible) {
+  std::cout << visible << std::endl;
+  vimag->fieldBoxRenderer.setVisibility(visible);
+}
+EMSCRIPTEN_KEEPALIVE
+void setOutlineColor(float r, float g, float b) {
+  vimag->fieldBoxRenderer.setColor(r, g, b);
+}
+EMSCRIPTEN_KEEPALIVE
 void setAmbientLighting(float intensity) {
   vimag->fieldRenderer.shader.setFloat("ambientLight", intensity);
 }

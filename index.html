@@ -182,6 +182,19 @@
                     oninput="updateColorInputBox(this);setBackgroundColor(this.value)">
             </p>
 
+            <p>
+                <b>Show outline</b>
+                <input type="checkbox" oninput="Module._setOutlineVisibility(this.checked);" checked>
+
+                <br>
+
+                <b>Outline color</b>
+                <span class="colorbox" id="outlineColorBox" onclick="document.getElementById('outlineColor').click()">
+                </span>
+                <input type="color" id="outlineColor" box="outlineColorBox"
+                    oninput="updateColorInputBox(this);setOutlineColor(this.value)">
+            </p>
+
 
             <p>
                 <b>Ambient light</b>
@@ -288,6 +301,11 @@
         function setBackgroundColor(hex) {
             var color = hexColorToRGBnormalized(hex);
             Module._setBackgroundColor(color.r, color.g, color.b);
+        }
+
+        function setOutlineColor(hex) {
+            var color = hexColorToRGBnormalized(hex);
+            Module._setOutlineColor(color.r, color.g, color.b);
         }
 
         function setMumaxColorScheme() {

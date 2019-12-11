@@ -10,6 +10,7 @@
 Vimag::Vimag(GLFWwindow* window)
     : window_(window), timeIntervalTrigger(0.1), fieldCollection(this) {
   fieldRenderer.putOnScene(&scene);
+  fieldBoxRenderer.putOnScene(&scene);
   setPlayDirection(PLAYFORWARD);
 }
 
@@ -23,6 +24,7 @@ void Vimag::loop() {
 
 void Vimag::updateField() {
   fieldRenderer.setField(fieldCollection.selectedField());
+  fieldBoxRenderer.setField(fieldCollection.selectedField());
 
 // update web gui
 #ifdef __EMSCRIPTEN__

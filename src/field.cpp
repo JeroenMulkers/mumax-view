@@ -14,9 +14,9 @@ Field::Field(glm::ivec3 gridsize, glm::vec3 cellsize)
   data.resize(ncells());
   positions.resize(ncells());
   glm::vec3 shift;
-  shift.x = -0.5 * cellsize.x * gridsize.x;
-  shift.y = -0.5 * cellsize.y * gridsize.y;
-  shift.z = -0.5 * cellsize.z * gridsize.z;
+  shift.x = -0.5 * cellsize.x * (gridsize.x - 1);
+  shift.y = -0.5 * cellsize.y * (gridsize.y - 1);
+  shift.z = -0.5 * cellsize.z * (gridsize.z - 1);
   for (int ix = 0; ix < gridsize.x; ix++) {
     for (int iy = 0; iy < gridsize.y; iy++) {
       for (int iz = 0; iz < gridsize.z; iz++) {

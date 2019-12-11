@@ -15,11 +15,14 @@ class SceneObject {
   void ensureRendering();
   Scene* scene();
   virtual void render() = 0;
+  void setVisibility(bool);
+  bool isVisible() const;
 
  private:
   SceneObject(const SceneObject&);
   SceneObject& operator=(const SceneObject&);
   Scene* scene_;
+  bool visible_;
 };
 
 class Scene {

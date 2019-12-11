@@ -6,6 +6,7 @@
 
 SceneObject::SceneObject() {
   scene_ = nullptr;
+  visible_ = true;
 }
 
 SceneObject::~SceneObject() {
@@ -46,6 +47,17 @@ Scene* SceneObject::scene() {
   return scene_;
 }
 
+void SceneObject::setVisibility(bool visible) {
+  if (visible == visible_)
+    return;
+  visible_ = visible;
+  ensureRendering();
+}
+
+bool SceneObject::isVisible() const {
+  return visible_;
+}
+
 bool Scene::needRendering() const {
   return needRender_;
 }
@@ -62,7 +74,8 @@ void Scene::ensureRendering() {
 void Scene::render() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   for (auto object : objects_) {
-    object->render();
+    if (object->isVisible())
+      object->render();
   }
   needRender_ = false;
 }

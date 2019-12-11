@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include "fieldboxrenderer.hpp"
 #include "fieldcollection.hpp"
 #include "fieldrenderer.hpp"
 #include "scene.hpp"
@@ -21,6 +22,7 @@ class Vimag {
   Scene scene;
   TimeIntervalTrigger timeIntervalTrigger;
   FieldRenderer fieldRenderer;
+  FieldBoxRenderer fieldBoxRenderer;
 
  private:
   Vimag(const Vimag&);
