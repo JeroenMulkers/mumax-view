@@ -10,9 +10,9 @@
 
 enum PlayDirection { PLAYFORWARD, PLAYBACKWARD };
 
-class Vimag {
+class Viewer {
  public:
-  Vimag(GLFWwindow* window);
+  Viewer(GLFWwindow* window);
 
   void loop();
   void updateField();
@@ -25,7 +25,7 @@ class Vimag {
   FieldBoxRenderer fieldBoxRenderer;
 
  private:
-  Vimag(const Vimag&);
-  Vimag& operator=(const Vimag&);
+  Viewer(const Viewer&);
+  Viewer& operator=(const Viewer&);
   GLFWwindow* window_;
 };

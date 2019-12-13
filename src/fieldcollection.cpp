@@ -4,13 +4,13 @@
 
 #include "fieldcollection.hpp"
 #include "ovf.hpp"
-#include "vimag.hpp"
+#include "viewer.hpp"
 
 NamedField::NamedField(Field* field, std::string name)
     : field(field), name(name) {}
 
-FieldCollection::FieldCollection(Vimag* vimag)
-    : selectedIdx_(-1), vimag_(vimag) {}
+FieldCollection::FieldCollection(Viewer* viewer)
+    : selectedIdx_(-1), viewer_(viewer) {}
 
 FieldCollection::~FieldCollection() {
   emptyCollection();
@@ -65,8 +65,8 @@ int FieldCollection::selectedFieldIdx() const {
 
 void FieldCollection::select(int Idx) {
   selectedIdx_ = Idx;
-  if (vimag_)
-    vimag_->updateField();
+  if (viewer_)
+    viewer_->updateField();
 }
 
 void FieldCollection::selectNext() {

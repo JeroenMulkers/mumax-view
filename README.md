@@ -1,15 +1,15 @@
-ViMag
-=====
+mumax-view
+==========
 
-[ViMag](http://dynamag.ugent.be/vimag) is a web app to visualize OVF files. The app is not yet officially released and is still under heavy development.
+[mumax-view](http://dynamag.ugent.be/mumax-view) is a web app to visualize OVF files. The app is not yet officially released and is still under heavy development.
 
 Local installation
 ------------------
 
 Download the source code and enter the directory
 ```sh
-git clone git@github.com:JeroenMulkers/ViMag.git
-cd ViMag
+git clone git@github.com:JeroenMulkers/mumax-view.git
+cd mumax-view
 ```
 
 You can choose if you want to build the desktop version or the web version. Use the following commands to build the desktop version:

@@ -15,12 +15,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "ovf.hpp"
-#include "vimag.hpp"
+#include "viewer.hpp"
 
 GLFWwindow* window;
-Vimag* vimag;
+Viewer* viewer;
 void main_loop() {
-  vimag->loop();
+  viewer->loop();
 };
 
 // TODO: put mouse and window in a descent window class
@@ -36,11 +36,11 @@ class Mouse {
 Mouse mouse;
 
 std::string getFieldName() {
-  return vimag->fieldCollection.selectedFieldName();
+  return viewer->fieldCollection.selectedFieldName();
 }
 
 void loadConfigFile(std::string filename) {
-  vimag->fieldCollection.load(filename);
+  viewer->fieldCollection.load(filename);
 }
 
 #ifdef __EMSCRIPTEN__
@@ -58,59 +58,59 @@ void setScrollSensitivity(double sensitivity) {
 }
 EMSCRIPTEN_KEEPALIVE
 void useArrowGlyph() {
-  vimag->fieldRenderer.setGlyphType(ARROW);
+  viewer->fieldRenderer.setGlyphType(ARROW);
 }
 EMSCRIPTEN_KEEPALIVE
 void useCuboidGlyph() {
-  vimag->fieldRenderer.setGlyphType(CUBOID);
+  viewer->fieldRenderer.setGlyphType(CUBOID);
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowShaftRadius(float r) {
-  vimag->fieldRenderer.arrow.setShaftRadius(r);
+  viewer->fieldRenderer.arrow.setShaftRadius(r);
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRadius(float r) {
-  vimag->fieldRenderer.arrow.setHeadRadius(r);
+  viewer->fieldRenderer.arrow.setHeadRadius(r);
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRatio(float r) {
-  vimag->fieldRenderer.arrow.setHeadRatio(r);
+  viewer->fieldRenderer.arrow.setHeadRatio(r);
 }
 EMSCRIPTEN_KEEPALIVE
 void updateArrowScalingsFactor(float s) {
-  vimag->fieldRenderer.setArrowScalingsFactor(s);
+  viewer->fieldRenderer.setArrowScalingsFactor(s);
 }
 EMSCRIPTEN_KEEPALIVE
 void updateCuboidScalingsFactor(float s) {
-  vimag->fieldRenderer.setCuboidScalingsFactor(s);
+  viewer->fieldRenderer.setCuboidScalingsFactor(s);
 }
 EMSCRIPTEN_KEEPALIVE
 void emptyFieldCollection() {
-  return vimag->fieldCollection.emptyCollection();
+  return viewer->fieldCollection.emptyCollection();
 }
 EMSCRIPTEN_KEEPALIVE
 int fieldCollectionSize() {
-  return vimag->fieldCollection.size();
+  return viewer->fieldCollection.size();
 }
 EMSCRIPTEN_KEEPALIVE
 int fieldCollectionSelected() {
-  return vimag->fieldCollection.selectedFieldIdx();
+  return viewer->fieldCollection.selectedFieldIdx();
 }
 EMSCRIPTEN_KEEPALIVE
 void fieldCollectionSelect(int idx) {
-  vimag->fieldCollection.select(idx);
+  viewer->fieldCollection.select(idx);
 }
 EMSCRIPTEN_KEEPALIVE
 void setTimeInterval(double timeInterval) {
-  vimag->timeIntervalTrigger.setTimeInterval(timeInterval);
+  viewer->timeIntervalTrigger.setTimeInterval(timeInterval);
 }
 EMSCRIPTEN_KEEPALIVE
 void startTimeIntervalTrigger() {
-  vimag->timeIntervalTrigger.start();
+  viewer->timeIntervalTrigger.start();
 }
 EMSCRIPTEN_KEEPALIVE
 void stopTimeIntervalTrigger() {
-  vimag->timeIntervalTrigger.stop();
+  viewer->timeIntervalTrigger.stop();
 }
 EM_JS(int, canvas_get_width, (), {
   return document.getElementById('canvas').scrollWidth;
@@ -130,20 +130,20 @@ void updateCanvasSize() {
 }
 EMSCRIPTEN_KEEPALIVE
 void setBackgroundColor(float r, float g, float b) {
-  vimag->scene.setBackgroundColor(r, g, b);
+  viewer->scene.setBackgroundColor(r, g, b);
 }
 EMSCRIPTEN_KEEPALIVE
 void setOutlineVisibility(bool visible) {
   std::cout << visible << std::endl;
-  vimag->fieldBoxRenderer.setVisibility(visible);
+  viewer->fieldBoxRenderer.setVisibility(visible);
 }
 EMSCRIPTEN_KEEPALIVE
 void setOutlineColor(float r, float g, float b) {
-  vimag->fieldBoxRenderer.setColor(r, g, b);
+  viewer->fieldBoxRenderer.setColor(r, g, b);
 }
 EMSCRIPTEN_KEEPALIVE
 void setAmbientLighting(float intensity) {
-  vimag->fieldRenderer.shader.setFloat("ambientLight", intensity);
+  viewer->fieldRenderer.shader.setFloat("ambientLight", intensity);
 }
 EMSCRIPTEN_KEEPALIVE
 void setGradientColorScheme(float r1,
@@ -155,12 +155,12 @@ void setGradientColorScheme(float r1,
                             float r3,
                             float g3,
                             float b3) {
-  vimag->fieldRenderer.setGradientColorScheme(
+  viewer->fieldRenderer.setGradientColorScheme(
       glm::mat3(r1, g1, b1, r2, g2, b2, r3, g3, b3));
 }
 EMSCRIPTEN_KEEPALIVE
 void setMumaxColorScheme() {
-  vimag->fieldRenderer.setMumaxColorScheme();
+  viewer->fieldRenderer.setMumaxColorScheme();
 }
 #endif
 }
@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
   glfwWindowHint(GLFW_SAMPLES, 16);  // anti-aliasing
   glfwWindowHint(GLFW_RESIZABLE, true);
 
-  window = glfwCreateWindow(width, height, "ViMag", NULL, NULL);
+  window = glfwCreateWindow(width, height, "mumax-view", NULL, NULL);
 
   if (!window) {
     std::cerr << "Can not create window" << std::endl;
@@ -220,25 +220,25 @@ int main(int argc, char** argv) {
   glEnable(GL_MULTISAMPLE);  // Needed for anti-aliasing
 #endif
 
-  vimag = new Vimag(window);
+  viewer = new Viewer(window);
 
   // -------- LOAD INITIAL FIELD --------------------------------------------
 
 #ifdef __EMSCRIPTEN__
-  vimag->fieldCollection.add(
+  viewer->fieldCollection.add(
       NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
 #else
   if (argc > 1) {
     // std::string filename(argv[1]);
     try {
-      vimag->fieldCollection.load(argv[1]);
+      viewer->fieldCollection.load(argv[1]);
     } catch (const std::fstream::failure& e) {
       std::cerr << e.what() << std::endl;
       return -1;
     }
 
   } else {
-    vimag->fieldCollection.add(
+    viewer->fieldCollection.add(
         NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
   }
 #endif
@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
   emscripten_set_main_loop(main_loop, 0, true);
 #else
   while (!glfwWindowShouldClose(window))
-    vimag->loop();
+    viewer->loop();
 #endif
 
   //-------- CLEAN UP --------------------------------------------------------
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
 }
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
-  vimag->scene.ensureRendering();
+  viewer->scene.ensureRendering();
   glViewport(0, 0, width, height);
 }
 
@@ -270,52 +270,52 @@ void keyCallBack(GLFWwindow* window,
                  int mods) {
   if (key == GLFW_KEY_X && action == GLFW_PRESS) {
     if (mods == 0) {
-      vimag->scene.camera.setYaw(glm::pi<float>() / 2);
+      viewer->scene.camera.setYaw(glm::pi<float>() / 2);
     } else if (mods == 1) {
-      vimag->scene.camera.setYaw(-glm::pi<float>() / 2);
+      viewer->scene.camera.setYaw(-glm::pi<float>() / 2);
     }
-    vimag->scene.camera.setPitch(0);
+    viewer->scene.camera.setPitch(0);
 
   } else if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
     if (mods == 0) {
-      vimag->scene.camera.setYaw(0);
+      viewer->scene.camera.setYaw(0);
     } else if (mods == 1) {
-      vimag->scene.camera.setYaw(glm::pi<float>());
+      viewer->scene.camera.setYaw(glm::pi<float>());
     }
-    vimag->scene.camera.setPitch(0);
+    viewer->scene.camera.setPitch(0);
 
   } else if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
     if (mods == 0) {
-      vimag->scene.camera.setPitch(glm::pi<float>() / 2);
+      viewer->scene.camera.setPitch(glm::pi<float>() / 2);
     } else if (mods == 1) {
-      vimag->scene.camera.setPitch(-glm::pi<float>() / 2);
+      viewer->scene.camera.setPitch(-glm::pi<float>() / 2);
     }
-    vimag->scene.camera.setYaw(0);
+    viewer->scene.camera.setYaw(0);
 
   } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
-    vimag->timeIntervalTrigger.start();
+    viewer->timeIntervalTrigger.start();
   } else if (key == GLFW_KEY_K && action == GLFW_RELEASE) {
-    vimag->timeIntervalTrigger.stop();
+    viewer->timeIntervalTrigger.stop();
 
   } else if (key == GLFW_KEY_J && action == GLFW_PRESS) {
-    vimag->setPlayDirection(PLAYBACKWARD);
-    vimag->timeIntervalTrigger.start();
+    viewer->setPlayDirection(PLAYBACKWARD);
+    viewer->timeIntervalTrigger.start();
   } else if (key == GLFW_KEY_J && action == GLFW_RELEASE) {
-    vimag->timeIntervalTrigger.stop();
-    vimag->setPlayDirection(PLAYFORWARD);  // set back default play direction
+    viewer->timeIntervalTrigger.stop();
+    viewer->setPlayDirection(PLAYFORWARD);  // set back default play direction
 
   } else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
-    if (vimag->timeIntervalTrigger.isActive()) {
-      vimag->timeIntervalTrigger.stop();
+    if (viewer->timeIntervalTrigger.isActive()) {
+      viewer->timeIntervalTrigger.stop();
     } else {
-      vimag->timeIntervalTrigger.start();
+      viewer->timeIntervalTrigger.start();
     }
   }
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-  float dist = vimag->scene.camera.distance();
-  vimag->scene.camera.setDistance(
+  float dist = viewer->scene.camera.distance();
+  viewer->scene.camera.setDistance(
       dist * (1.0 - static_cast<float>(mouse.scrollSensitivity * yoffset)));
 }
 
@@ -346,11 +346,11 @@ void curserPosCallback(GLFWwindow* window, double xpos, double ypos) {
   if (mouse.leftButtonDown) {
     float sensitivity = 0.02;
 
-    float newYaw = vimag->scene.camera.yaw() + sensitivity * xoffset;
-    float newPitch = vimag->scene.camera.pitch() - sensitivity * yoffset;
+    float newYaw = viewer->scene.camera.yaw() + sensitivity * xoffset;
+    float newPitch = viewer->scene.camera.pitch() - sensitivity * yoffset;
 
-    vimag->scene.camera.setYaw(newYaw);
-    vimag->scene.camera.setPitch(newPitch);
+    viewer->scene.camera.setYaw(newYaw);
+    viewer->scene.camera.setPitch(newPitch);
   }
   // TODO: fix middle button feature
   // if (mouse.middleButtonDown) {

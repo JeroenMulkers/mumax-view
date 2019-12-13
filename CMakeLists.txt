@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.5.1)
 
-project(vimag)
+project(mumax-view)
 
 file(GLOB SOURCES src/*)
-add_executable(vimag ${SOURCES})
+add_executable(mumax-view ${SOURCES})
 add_definitions(-std=c++14)
 
 if (EMSCRIPTEN) 
 
-    set_target_properties(vimag PROPERTIES LINK_FLAGS " \
+    set_target_properties(mumax-view PROPERTIES LINK_FLAGS " \
         --bind \
         -s WASM=1 \
         -s USE_GLFW=3 \
@@ -28,8 +28,8 @@ else(EMSCRIPTEN)
     find_package(OpenGL REQUIRED)
     find_package(glfw3 REQUIRED)
 
-    target_include_directories(vimag PUBLIC ${OPENGL_INCLUDE_DIR})
-    target_link_libraries(vimag ${OPENGL_LIBRARIES})
-    target_link_libraries(vimag glfw)
+    target_include_directories(mumax-view PUBLIC ${OPENGL_INCLUDE_DIR})
+    target_link_libraries(mumax-view ${OPENGL_LIBRARIES})
+    target_link_libraries(mumax-view glfw)
 
 endif(EMSCRIPTEN)

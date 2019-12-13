@@ -30,7 +30,7 @@
         {
             "type": "shell",
             "label": "run desktop version",
-            "command": "./build/desktop/vimag",
+            "command": "./build/desktop/mumax-view",
             "args": [],
             "options": {
                 "cwd": "${workspaceRoot}"
@@ -60,9 +60,10 @@
             "label": "upload web version to dynamag",
             "command": "scp",
             "args": [
-                "-r",
-                "./build/web/*",
-                "jeroen@dynamag:/srv/www/vimag"
+                "./build/web/mumax-view.wasm",
+                "./build/web/mumax-view.js",
+                "./build/web/index.html",
+                "jeroen@dynamag:/srv/www/mumax-view"
             ],
             "options": {
                 "cwd": "${workspaceRoot}"

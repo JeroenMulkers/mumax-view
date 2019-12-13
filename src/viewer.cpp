@@ -5,16 +5,16 @@
 #endif
 
 #include "fieldcollection.hpp"
-#include "vimag.hpp"
+#include "viewer.hpp"
 
-Vimag::Vimag(GLFWwindow* window)
+Viewer::Viewer(GLFWwindow* window)
     : window_(window), timeIntervalTrigger(0.1), fieldCollection(this) {
   fieldRenderer.putOnScene(&scene);
   fieldBoxRenderer.putOnScene(&scene);
   setPlayDirection(PLAYFORWARD);
 }
 
-void Vimag::loop() {
+void Viewer::loop() {
   timeIntervalTrigger();
   if (scene.needRendering())
     scene.render();
@@ -22,7 +22,7 @@ void Vimag::loop() {
   glfwPollEvents();  // alternative: glfwWaitEvents();
 }
 
-void Vimag::updateField() {
+void Viewer::updateField() {
   fieldRenderer.setField(fieldCollection.selectedField());
   fieldBoxRenderer.setField(fieldCollection.selectedField());
 
@@ -32,7 +32,7 @@ void Vimag::updateField() {
 #endif
 }
 
-void Vimag::setPlayDirection(PlayDirection playDirection) {
+void Viewer::setPlayDirection(PlayDirection playDirection) {
   if (playDirection == PLAYFORWARD) {
     timeIntervalTrigger.setAction([&]() { fieldCollection.selectNext(); });
   } else {

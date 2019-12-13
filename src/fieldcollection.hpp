@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-class Vimag;
+class Viewer;
 class Field;
 
 struct NamedField {
@@ -14,7 +14,7 @@ struct NamedField {
 
 class FieldCollection {
  public:
-  FieldCollection(Vimag* vimag = nullptr);
+  FieldCollection(Viewer* viewer = nullptr);
   ~FieldCollection();
 
   void emptyCollection();
@@ -35,5 +35,5 @@ class FieldCollection {
   FieldCollection& operator=(const FieldCollection&);
   std::vector<NamedField> fields;
   int selectedIdx_;
-  Vimag* vimag_;
+  Viewer* viewer_;
 };
