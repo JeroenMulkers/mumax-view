@@ -18,6 +18,7 @@ FieldRenderer::FieldRenderer()
   setCuboidScalingsFactor(1.0);
   setArrowScalingsFactor(1.0);
   setMumaxColorScheme();
+  setRelativeRange({0, 0, 0}, {1, 1, 1});
 
   arrow.setParent(this);
   cuboid.setParent(this);
@@ -33,6 +34,7 @@ FieldRenderer::~FieldRenderer() {
 
 void FieldRenderer::setField(Field* field) {
   field_ = field;
+  updateRange();
   updateFieldVBOs();
   updateFieldAttribPointers();
   cuboid.setSize(field->cellsize);
@@ -60,6 +62,24 @@ void FieldRenderer::setArrowScalingsFactor(float scalingsFactor) {
 void FieldRenderer::setCuboidScalingsFactor(float scalingsFactor) {
   cuboidScalingsFactor_ = scalingsFactor;
   shader.setFloat("cuboidScalingsFactor", scalingsFactor);
+}
+
+void FieldRenderer::setRelativeRange(glm::vec3 low, glm::vec3 high) {
+  relativeRangeLow_ = low;
+  relativeRangeHigh_ = high;
+  if (field_)
+    updateRange();
+}
+
+void FieldRenderer::updateRange() {
+  glm::vec3 L(field_->cellsize.x * field_->gridsize().x,
+              field_->cellsize.y * field_->gridsize().y,
+              field_->cellsize.z * field_->gridsize().z);
+
+  glm::vec3 absoluteLow = (relativeRangeLow_ - glm::vec3(0.5, 0.5, 0.5)) * L;
+  glm::vec3 absoluteHigh = (relativeRangeHigh_ - glm::vec3(0.5, 0.5, 0.5)) * L;
+  shader.setVec3("rangeLow", absoluteLow);
+  shader.setVec3("rangeHigh", absoluteHigh);
 }
 
 void FieldRenderer::setGlyphType(GlyphType type) {

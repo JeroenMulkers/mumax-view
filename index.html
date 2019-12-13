@@ -63,6 +63,10 @@
             color: #222
         }
 
+        .fieldRange {
+            width: fit-content;
+        }
+
         .colorbox {
             cursor: pointer;
             border: 1px solid black;
@@ -128,6 +132,50 @@
             <br>
 
             <input type="button" id="playButton" value="Play">
+
+            <br>
+            <br>
+
+            <table>
+                <tr>
+                    <td></td>
+                    <td style="text-align: center;">Min</td>
+                    <td style="text-align: center;">Max</td>
+                </tr>
+                <tr>
+                    <td>x-range</td>
+                    <td>
+                        <input type="range" class="fieldRange" id="xrangeLow" min="0.0" max="1.0" step=0.01 value="0.0"
+                            oninput="updateRange();">
+                    </td>
+                    <td>
+                        <input type="range" class="fieldRange" id="xrangeHigh" min="0.0" max="1.0" step=0.01 value="1.0"
+                            oninput="updateRange();">
+                    </td>
+                </tr>
+                <tr>
+                    <td>y-range</td>
+                    <td>
+                        <input type="range" class="fieldRange" id="yrangeLow" min="0.0" max="1.0" step=0.01 value="0.0"
+                            oninput="updateRange();">
+                    </td>
+                    <td>
+                        <input type="range" class="fieldRange" id="yrangeHigh" min="0.0" max="1.0" step=0.01 value="1.0"
+                            oninput="updateRange();">
+                    </td>
+                </tr>
+                <tr>
+                    <td>z-range</td>
+                    <td>
+                        <input type="range" class="fieldRange" id="zrangeLow" min="0.0" max="1.0" step=0.01 value="0.0"
+                            oninput="updateRange();">
+                    </td>
+                    <td>
+                        <input type="range" class="fieldRange" id="zrangeHigh" min="0.0" max="1.0" step=0.01 value="1.0"
+                            oninput="updateRange();">
+                    </td>
+                </tr>
+            </table>
         </div>
 
 
@@ -289,6 +337,16 @@
             }
         }
 
+        function updateRange() {
+            var xLow = document.getElementById("xrangeLow").value;
+            var yLow = document.getElementById("yrangeLow").value;
+            var zLow = document.getElementById("zrangeLow").value;
+            var xHigh = document.getElementById("xrangeHigh").value;
+            var yHigh = document.getElementById("yrangeHigh").value;
+            var zHigh = document.getElementById("zrangeHigh").value;
+            Module._updateRelativeRange(xLow, yLow, zLow, xHigh, yHigh, zHigh);
+        }
+
         function hexColorToRGBnormalized(hex) {
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return {
@@ -430,6 +488,19 @@
             }, false);
 
         }
+
+        // Make sure that inputs are reset after refreshing the page
+        function turnAutoCompletionOff() {
+            if (document.getElementsByTagName) {
+                var inputElements = document.getElementsByTagName('input');
+                for (i = 0; inputElements[i]; i++) {
+                    inputElements[i].setAttribute('autocomplete', 'off');
+                }
+            }
+        }
+        turnAutoCompletionOff();
+
+
     </script>
 
 </body>

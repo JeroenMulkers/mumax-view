@@ -18,7 +18,6 @@ varying vec3 Normal;
 varying vec3 Color;
 
 uniform ivec3 gridsize;
-
 uniform mat4 view;
 uniform mat4 projection;
 uniform float arrowScalingsFactor;
@@ -26,6 +25,15 @@ uniform float cuboidScalingsFactor;
 uniform mat3 colorGradient;
 uniform bool useColorGradient;
 uniform bool arrowGlyph;
+uniform vec3 rangeLow;
+uniform vec3 rangeHigh;
+
+bool inRange(vec3 pos) {
+    if (pos.x < rangeLow.x || pos.x > rangeHigh.x) { return false; }
+    if (pos.y < rangeLow.y || pos.y > rangeHigh.y) { return false; }
+    if (pos.z < rangeLow.z || pos.z > rangeHigh.z) { return false; }
+    return true;
+}
 
 mat3 transInverse(mat3 a)  {
     mat3 b;
@@ -98,6 +106,8 @@ vec3 vec2rgb_mumax(vec3 vec) {
 }
 
 void main() {
+    if (!inRange(aInstancePos))
+        return;
     vec4 local = vec4(aPos, 1.0);
 
     mat4 translation = mat4(1.0);

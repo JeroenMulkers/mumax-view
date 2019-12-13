@@ -24,6 +24,7 @@ class FieldRenderer : public SceneObject {
   void setGlyphType(GlyphType);
   void setArrowScalingsFactor(float);
   void setCuboidScalingsFactor(float);
+  void setRelativeRange(glm::vec3 low, glm::vec3 high);
   void initShader();
   void initVertexArray();
   void updateGlyphAttribPointers();
@@ -42,6 +43,7 @@ class FieldRenderer : public SceneObject {
  private:
   FieldRenderer(const FieldRenderer&);
   FieldRenderer& operator=(const FieldRenderer&);
+
   Field* field_;
   Glyph* glyph;  // points either to arrow or to cuboid
   unsigned int positionVBO_;
@@ -52,4 +54,8 @@ class FieldRenderer : public SceneObject {
   glm::mat3 colorGradient_;
   float arrowScalingsFactor_;
   float cuboidScalingsFactor_;
+  glm::vec3 relativeRangeLow_;
+  glm::vec3 relativeRangeHigh_;
+
+  void updateRange();
 };

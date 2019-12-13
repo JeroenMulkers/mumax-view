@@ -85,6 +85,17 @@ void updateCuboidScalingsFactor(float s) {
   viewer->fieldRenderer.setCuboidScalingsFactor(s);
 }
 EMSCRIPTEN_KEEPALIVE
+void updateRelativeRange(float xmin,
+                         float ymin,
+                         float zmin,
+                         float xmax,
+                         float ymax,
+                         float zmax) {
+  std::cout << xmin << std::endl;
+  viewer->fieldRenderer.setRelativeRange({xmin, ymin, zmin},
+                                         {xmax, ymax, zmax});
+}
+EMSCRIPTEN_KEEPALIVE
 void emptyFieldCollection() {
   return viewer->fieldCollection.emptyCollection();
 }
