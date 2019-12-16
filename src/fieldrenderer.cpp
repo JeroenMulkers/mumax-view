@@ -8,6 +8,8 @@ FieldRenderer::FieldRenderer()
     : cuboid(glm::vec3{1.0, 1.0, 1.0}),
       arrow(0.12, 0.2, 0.6, 40),
       shader(this) {
+  field_ = nullptr;
+
   glGenBuffers(1, &vectorsVBO_);
   glGenBuffers(1, &positionVBO_);
 
@@ -22,8 +24,6 @@ FieldRenderer::FieldRenderer()
 
   arrow.setParent(this);
   cuboid.setParent(this);
-
-  field_ = nullptr;
 }
 
 FieldRenderer::~FieldRenderer() {

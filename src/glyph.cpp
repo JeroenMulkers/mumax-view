@@ -26,7 +26,8 @@ void Glyph::updateVBOdata() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(Triangle) * nTriangles_, &triangles_[0],
                GL_STATIC_DRAW);
   nVertices_ = 3 * nTriangles_;
-  parent_->ensureRendering();
+  if (parent_)
+    parent_->ensureRendering();
 }
 
 void Glyph::setParent(SceneObject* parent) {

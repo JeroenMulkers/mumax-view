@@ -1,7 +1,7 @@
-#include "arrow.hpp"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "arrow.hpp"
 
 const float PI = glm::pi<float>();
 
