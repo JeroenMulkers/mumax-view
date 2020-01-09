@@ -57,6 +57,27 @@ mat3 transInverse(mat3 a)  {
     return b;
 }
 
+mat4 rotateToDirection(vec3 vec) {
+    vec3 vecDir = normalize(vec);
+
+    // The rotating to (0,0,-1) can be done in different ways
+    // and leads to a division by zero in the 'skew method'.
+    // So in this case, we construct the rotation matrix by hand.
+    if (vecDir.z < -0.999) { 
+        return mat4(mat3( 1.0, 0.0, 0.0,
+                          0.0,-1.0, 0.0,
+                          0.0, 0.0,-1.0  ));
+    }
+
+    mat4 skew = mat4(0.0);
+    skew[0][2] = -vecDir.x;
+    skew[1][2] = -vecDir.y;
+    skew[2][0] =  vecDir.x;
+    skew[2][1] =  vecDir.y;
+    mat4 rotation = mat4(1.0) + skew + skew*skew*(1./(1.+vecDir.z));
+    return rotation;
+}
+
 vec3 vec2rgb_gradient(vec3 vec) {
     vec = normalize(vec);
 
@@ -72,6 +93,7 @@ vec3 vec2rgb_gradient(vec3 vec) {
 }
 
 vec3 vec2rgb_mumax(vec3 vec) {
+    vec = normalize(vec);
     float H = atan(vec.y, vec.x);
     float S = 1.0;
     float L = 0.5+0.5*vec.z;
@@ -115,15 +137,7 @@ void main() {
     translation[3][1] = aInstancePos[1];
     translation[3][2] = aInstancePos[2];
 
-    vec3 vecDir = normalize(aInstanceVector);
-    mat4 skew = mat4(0.0);
-    skew[0][2] = -vecDir.x;
-    skew[1][2] = -vecDir.y;
-    skew[2][0] =  vecDir.x;
-    skew[2][1] =  vecDir.y;
-    mat4 rotation = mat4(1.0);
-    rotation = mat4(1.0) + skew + skew*skew*(1./(1.+vecDir.z));
-
+    mat4 rotation = rotateToDirection(aInstanceVector);
 
     mat4 model;
     if (arrowGlyph) {
@@ -150,9 +164,9 @@ void main() {
  	gl_Position =  projection * view * model * local;
 
     if (useColorGradient) {
-        Color = vec2rgb_gradient(vecDir);
+        Color = vec2rgb_gradient(aInstanceVector);
     } else {
-        Color = vec2rgb_mumax(vecDir);
+        Color = vec2rgb_mumax(aInstanceVector);
     }
 }
 )";
