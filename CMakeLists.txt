@@ -13,6 +13,7 @@ if (EMSCRIPTEN)
         -s WASM=1 \
         -s USE_GLFW=3 \
         -s USE_WEBGL2=1 \
+        -s USE_LIBPNG=1 \
         -s FORCE_FILESYSTEM=1 \
         -s EXPORT_ALL=1 \
         -s EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap'] \
@@ -27,9 +28,11 @@ else(EMSCRIPTEN)
 
     find_package(OpenGL REQUIRED)
     find_package(glfw3 REQUIRED)
+    find_package(PNG REQUIRED)
 
-    target_include_directories(mumax-view PUBLIC ${OPENGL_INCLUDE_DIR})
+    target_include_directories(mumax-view PUBLIC ${PNG_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
     target_link_libraries(mumax-view ${OPENGL_LIBRARIES})
+    target_link_libraries(mumax-view ${PNG_LIBRARIES})
     target_link_libraries(mumax-view glfw)
 
 endif(EMSCRIPTEN)

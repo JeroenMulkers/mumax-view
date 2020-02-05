@@ -33,6 +33,7 @@ class Scene {
   void setBackgroundColor(float r, float g, float b);
   void ensureRendering();
   void render();
+  void screenshot();
   void resetCamera();
   Camera camera;
 

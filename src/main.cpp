@@ -11,6 +11,7 @@
 #endif
 
 #include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -172,6 +173,10 @@ void setGradientColorScheme(float r1,
 EMSCRIPTEN_KEEPALIVE
 void setMumaxColorScheme() {
   viewer->fieldRenderer.setMumaxColorScheme();
+}
+EMSCRIPTEN_KEEPALIVE
+void takeScreenshot() {
+  viewer->scene.screenshot();
 }
 #endif
 }
