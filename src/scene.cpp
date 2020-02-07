@@ -81,7 +81,7 @@ void Scene::render() {
   needRender_ = false;
 }
 
-void Scene::screenshot() {
+void Scene::screenshot(std::string filename) {
   render();
 
   int viewport[4];
@@ -103,8 +103,7 @@ void Scene::screenshot() {
 
   // TODO: check errors, add meta data
 
-  auto filename = "screenshot.png";
-  FILE* fp = fopen(filename, "wb");
+  FILE* fp = fopen(&filename[0], "wb");
 
   png_structp png_ptr =
       png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);

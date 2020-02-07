@@ -176,7 +176,7 @@ void setMumaxColorScheme() {
 }
 EMSCRIPTEN_KEEPALIVE
 void takeScreenshot() {
-  viewer->scene.screenshot();
+  viewer->scene.screenshot("screenshot.png");
 }
 #endif
 }

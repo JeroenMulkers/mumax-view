@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <string>
 
 #include "camera.hpp"
 
@@ -33,7 +34,7 @@ class Scene {
   void setBackgroundColor(float r, float g, float b);
   void ensureRendering();
   void render();
-  void screenshot();
+  void screenshot(std::string filename);
   void resetCamera();
   Camera camera;
 
