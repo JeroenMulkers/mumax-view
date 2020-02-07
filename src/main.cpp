@@ -245,14 +245,14 @@ int main(int argc, char** argv) {
       NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
 #else
   if (argc > 1) {
-    // std::string filename(argv[1]);
-    try {
-      viewer->fieldCollection.load(argv[1]);
-    } catch (const std::fstream::failure& e) {
-      std::cerr << e.what() << std::endl;
-      return -1;
+    for (int i = 1; i < argc - 1; i++) {
+      try {
+        viewer->fieldCollection.load(argv[i]);
+      } catch (const std::fstream::failure& e) {
+        std::cerr << e.what() << std::endl;
+        return -1;
+      }
     }
-
   } else {
     viewer->fieldCollection.add(
         NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
