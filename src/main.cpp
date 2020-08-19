@@ -359,22 +359,27 @@ void curserPosCallback(GLFWwindow* window, double xpos, double ypos) {
   mouse.lastX = xpos;
   mouse.lastY = ypos;
 
+  Camera* camera = &viewer->scene.camera;
+
   if (mouse.leftButtonDown) {
     float sensitivity = 0.02;
-
-    float newYaw = viewer->scene.camera.yaw() + sensitivity * xoffset;
-    float newPitch = viewer->scene.camera.pitch() - sensitivity * yoffset;
-
-    viewer->scene.camera.setYaw(newYaw);
-    viewer->scene.camera.setPitch(newPitch);
+    float newYaw = camera->yaw() + sensitivity * xoffset;
+    float newPitch = camera->pitch() - sensitivity * yoffset;
+    camera->setYaw(newYaw);
+    camera->setPitch(newPitch);
   }
   // TODO: fix middle button feature
-  // if (mouse.middleButtonDown) {
-  //  renderer->needRender = true;
-  //  renderer->camera.target -= 0.05f * yoffset * renderer->camera.up();
-  //  // camera.target[0] -= 0.05 * xoffset;
-  //  // camera.target[2] -= 0.05 * yoffset;
-  //}
+  if (mouse.middleButtonDown) {
+    float sensitivity = 0.02;
+    glm::vec3 target = camera->target();
+    glm::vec3 position = camera->position();
+    glm::vec3 vertical = camera->up();
+    glm::vec3 horizontal =
+        glm::normalize(glm::cross(target - position, vertical));
+    target -= sensitivity * yoffset * vertical;
+    target -= sensitivity * xoffset * horizontal;
+    camera->setTarget(target);
+  }
 }
 
 void errorCallback(int error, const char* description) {
