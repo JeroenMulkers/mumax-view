@@ -15,6 +15,7 @@ class Camera {
   /// Copies the state of the camera (but keeps his own pointer to a scene)
   Camera& operator=(const Camera& camera);
 
+  void reset();
   void setTarget(glm::vec3);
   void setDistance(float);
   void setYaw(float);

@@ -308,6 +308,9 @@ void keyCallBack(GLFWwindow* window,
     }
     viewer->scene.camera.setYaw(0);
 
+  } else if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+    viewer->scene.camera.reset();
+
   } else if (key == GLFW_KEY_K && action == GLFW_PRESS) {
     viewer->timeIntervalTrigger.start();
   } else if (key == GLFW_KEY_K && action == GLFW_RELEASE) {

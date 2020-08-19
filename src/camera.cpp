@@ -6,11 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 Camera::Camera(Scene* scene) : scene_(scene) {
-  targetDistance_ = 40.0f;
-  yaw_ = (0.0);
-  pitch_ = (3.1415 / 10.);
-  target_ = glm::vec3(0, 0, 0);
-  ensureRendering();
+  reset();
 }
 
 Camera::Camera(const Camera& camera) : scene_(nullptr) {
@@ -28,6 +24,14 @@ Camera& Camera::operator=(const Camera& camera) {
   target_ = camera.target_;
   ensureRendering();
   return *this;
+}
+
+void Camera::reset() {
+  targetDistance_ = 40.0f;
+  yaw_ = (0.0);
+  pitch_ = (3.1415 / 10.);
+  target_ = glm::vec3(0, 0, 0);
+  ensureRendering();
 }
 
 void Camera::setTarget(glm::vec3 target) {
