@@ -1,7 +1,7 @@
 mumax-view
 ==========
 
-[mumax-view](http://dynamag.ugent.be/mumax-view) is a web app to visualize OVF files. The app is not yet officially released and is still under heavy development.
+[mumax-view](http://mumax.ugent.be/mumax-view) is a web app to visualize OVF files.
 
 Local installation
 ------------------
