@@ -2,13 +2,8 @@
 #include <functional>
 #include <iostream>
 
-// USE GLES API FOR RENDERING
-#ifdef __EMSCRIPTEN__
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h>
-#else
-#include <GLES3/gl3.h>
-#endif
 
 #include <GLFW/glfw3.h>
 
@@ -44,47 +39,53 @@ void loadConfigFile(std::string filename) {
   viewer->fieldCollection.load(filename);
 }
 
-#ifdef __EMSCRIPTEN__
 EMSCRIPTEN_BINDINGS(myModule) {
   emscripten::function("getFieldName", &getFieldName);
   emscripten::function("loadConfigFile", &loadConfigFile);
 }
-#endif
 
 extern "C" {
-#ifdef __EMSCRIPTEN__
+
 EMSCRIPTEN_KEEPALIVE
 void setScrollSensitivity(double sensitivity) {
   mouse.scrollSensitivity = sensitivity;
 }
+
 EMSCRIPTEN_KEEPALIVE
 void useArrowGlyph() {
   viewer->fieldRenderer.setGlyphType(ARROW);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void useCuboidGlyph() {
   viewer->fieldRenderer.setGlyphType(CUBOID);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void updateArrowShaftRadius(float r) {
   viewer->fieldRenderer.arrow.setShaftRadius(r);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRadius(float r) {
   viewer->fieldRenderer.arrow.setHeadRadius(r);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void updateArrowHeadRatio(float r) {
   viewer->fieldRenderer.arrow.setHeadRatio(r);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void updateArrowScalingsFactor(float s) {
   viewer->fieldRenderer.setArrowScalingsFactor(s);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void updateCuboidScalingsFactor(float s) {
   viewer->fieldRenderer.setCuboidScalingsFactor(s);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void updateRelativeRange(float xmin,
                          float ymin,
@@ -96,40 +97,50 @@ void updateRelativeRange(float xmin,
   viewer->fieldRenderer.setRelativeRange({xmin, ymin, zmin},
                                          {xmax, ymax, zmax});
 }
+
 EMSCRIPTEN_KEEPALIVE
 void emptyFieldCollection() {
   return viewer->fieldCollection.emptyCollection();
 }
+
 EMSCRIPTEN_KEEPALIVE
 int fieldCollectionSize() {
   return viewer->fieldCollection.size();
 }
+
 EMSCRIPTEN_KEEPALIVE
 int fieldCollectionSelected() {
   return viewer->fieldCollection.selectedFieldIdx();
 }
+
 EMSCRIPTEN_KEEPALIVE
 void fieldCollectionSelect(int idx) {
   viewer->fieldCollection.select(idx);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void setTimeInterval(double timeInterval) {
   viewer->timeIntervalTrigger.setTimeInterval(timeInterval);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void startTimeIntervalTrigger() {
   viewer->timeIntervalTrigger.start();
 }
+
 EMSCRIPTEN_KEEPALIVE
 void stopTimeIntervalTrigger() {
   viewer->timeIntervalTrigger.stop();
 }
+
 EM_JS(int, canvas_get_width, (), {
   return document.getElementById('canvas').scrollWidth;
 });
+
 EM_JS(int, canvas_get_height, (), {
   return document.getElementById('canvas').scrollHeight;
 });
+
 EMSCRIPTEN_KEEPALIVE
 void updateCanvasSize() {
   if (!window) {
@@ -140,23 +151,28 @@ void updateCanvasSize() {
   glfwSetWindowSize(window, width, height);
   glViewport(0, 0, width, height);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void setBackgroundColor(float r, float g, float b) {
   viewer->scene.setBackgroundColor(r, g, b);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void setOutlineVisibility(bool visible) {
   std::cout << visible << std::endl;
   viewer->fieldBoxRenderer.setVisibility(visible);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void setOutlineColor(float r, float g, float b) {
   viewer->fieldBoxRenderer.setColor(r, g, b);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void setAmbientLighting(float intensity) {
   viewer->fieldRenderer.shader.setFloat("ambientLight", intensity);
 }
+
 EMSCRIPTEN_KEEPALIVE
 void setGradientColorScheme(float r1,
                             float g1,
@@ -170,11 +186,11 @@ void setGradientColorScheme(float r1,
   viewer->fieldRenderer.setGradientColorScheme(
       glm::mat3(r1, g1, b1, r2, g2, b2, r3, g3, b3));
 }
+
 EMSCRIPTEN_KEEPALIVE
 void setMumaxColorScheme() {
   viewer->fieldRenderer.setMumaxColorScheme();
 }
-#endif
 }
 
 // ------- GLFW CALLBACKS ------------------------------------------------------
@@ -196,13 +212,8 @@ int main(int argc, char** argv) {
 
   // ------- CREATE WINDOW -----------------------------------------------------
 
-#ifdef __EMSCRIPTEN__
   int width = canvas_get_width();
   int height = canvas_get_height();
-#else
-  int width = 800;
-  int height = 600;
-#endif
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -228,41 +239,17 @@ int main(int argc, char** argv) {
   // -------- GL SETTINGS --------------------------------------------------
 
   glEnable(GL_DEPTH_TEST);
-#ifndef __EMSCRIPTEN__
-  glEnable(GL_MULTISAMPLE);  // Needed for anti-aliasing
-#endif
 
   viewer = new Viewer(window);
 
   // -------- LOAD INITIAL FIELD --------------------------------------------
 
-#ifdef __EMSCRIPTEN__
   viewer->fieldCollection.add(
       NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
-#else
-  if (argc > 1) {
-    for (int i = 1; i < argc - 1; i++) {
-      try {
-        viewer->fieldCollection.load(argv[i]);
-      } catch (const std::fstream::failure& e) {
-        std::cerr << e.what() << std::endl;
-        return -1;
-      }
-    }
-  } else {
-    viewer->fieldCollection.add(
-        NamedField(testField(glm::ivec3(50, 50, 1)), "example"));
-  }
-#endif
 
   //--------- MAIN LOOP ----------------------------------------------------
 
-#ifdef __EMSCRIPTEN__
   emscripten_set_main_loop(main_loop, 0, true);
-#else
-  while (!glfwWindowShouldClose(window))
-    viewer->loop();
-#endif
 
   //-------- CLEAN UP --------------------------------------------------------
 

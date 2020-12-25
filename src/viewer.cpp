@@ -1,8 +1,6 @@
 #include <GLFW/glfw3.h>
 
-#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
-#endif
 
 #include "fieldcollection.hpp"
 #include "viewer.hpp"
@@ -25,11 +23,7 @@ void Viewer::loop() {
 void Viewer::updateField() {
   fieldRenderer.setField(fieldCollection.selectedField());
   fieldBoxRenderer.setField(fieldCollection.selectedField());
-
-// update web gui
-#ifdef __EMSCRIPTEN__
   EM_ASM({ updateFieldSelector(); });
-#endif
 }
 
 void Viewer::setPlayDirection(PlayDirection playDirection) {
