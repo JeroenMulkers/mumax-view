@@ -1,7 +1,6 @@
 #include "scene.hpp"
 
 #include <GLES3/gl3.h>
-#include <libpng/png.h>
 
 #include <iostream>
 
@@ -79,48 +78,6 @@ void Scene::render() {
       object->render();
   }
   needRender_ = false;
-}
-
-void Scene::screenshot(std::string filename) {
-  render();
-
-  int viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  int width = viewport[2];
-  int height = viewport[3];
-  int nComp = 4;  // RGBA
-  int pixelDataSize = width * height * nComp;
-
-  uint8_t* pixelData = new uint8_t[pixelDataSize];
-
-  glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3], GL_RGBA,
-               GL_UNSIGNED_BYTE, pixelData);
-
-  png_bytepp rows = new png_bytep[height];
-  for (int i = 0; i < height; i++) {
-    rows[i] = &pixelData[4 * width * (height - i - 1)];
-  }
-
-  // TODO: check errors, add meta data
-
-  FILE* fp = fopen(&filename[0], "wb");
-
-  png_structp png_ptr =
-      png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  png_infop info_ptr = png_create_info_struct(png_ptr);
-
-  png_init_io(png_ptr, fp);
-  png_set_IHDR(png_ptr, info_ptr, width, height, 8 /* bit_depth */,
-               PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
-               PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-  png_write_info(png_ptr, info_ptr);
-  png_write_image(png_ptr, rows);
-  png_write_end(png_ptr, NULL);
-
-  fclose(fp);
-
-  delete[] pixelData;
-  delete[] rows;
 }
 
 void Scene::resetCamera() {

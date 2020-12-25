@@ -174,10 +174,6 @@ EMSCRIPTEN_KEEPALIVE
 void setMumaxColorScheme() {
   viewer->fieldRenderer.setMumaxColorScheme();
 }
-EMSCRIPTEN_KEEPALIVE
-void takeScreenshot() {
-  viewer->scene.screenshot("screenshot.png");
-}
 #endif
 }
 

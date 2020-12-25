@@ -13,7 +13,6 @@ if (EMSCRIPTEN)
         -s WASM=1 \
         -s USE_GLFW=3 \
         -s USE_WEBGL2=1 \
-        -s USE_LIBPNG=1 \
         -s FORCE_FILESYSTEM=1 \
         -s EXPORT_ALL=1 \
         -s EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap'] \
