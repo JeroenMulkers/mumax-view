@@ -16,6 +16,9 @@ set_target_properties(mumax-view PROPERTIES LINK_FLAGS " \
     -s EXTRA_EXPORTED_RUNTIME_METHODS=['cwrap'] \
     -s ALLOW_MEMORY_GROWTH=1 ")
 
+add_subdirectory(thirdparty/glm)
+target_link_libraries(mumax-view glm)
+
 configure_file(
     ${CMAKE_SOURCE_DIR}/index.html 
     ${CMAKE_CURRENT_BINARY_DIR}/index.html 
