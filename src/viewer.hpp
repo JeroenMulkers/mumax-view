@@ -1,23 +1,24 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "application.hpp"
 #include "fieldboxrenderer.hpp"
 #include "fieldcollection.hpp"
 #include "fieldrenderer.hpp"
 #include "scene.hpp"
 #include "timeintervaltrigger.hpp"
-#include "application.hpp"
 
 enum PlayDirection { PLAYFORWARD, PLAYBACKWARD };
 
 class Viewer : public Application {
  public:
-  static Viewer& get() {
-    static Viewer viewer; 
-    return viewer;
+  static Viewer* get() {
+    static Viewer viewer;
+    return &viewer;
   }
 
  private:
@@ -43,4 +44,6 @@ class Viewer : public Application {
   TimeIntervalTrigger timeIntervalTrigger;
   FieldRenderer fieldRenderer;
   FieldBoxRenderer fieldBoxRenderer;
+
+  std::function<void()> updateFieldCallback;
 };
